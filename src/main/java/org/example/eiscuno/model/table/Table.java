@@ -8,14 +8,14 @@ import java.util.ArrayList;
  * Represents the table in the Uno game where cards are played.
  */
 public class Table {
-    private ArrayList<Card> cardsTable;
+    private final ArrayList<Card> cardsTable;
+    private String currentColor;
+    private String currentNum;
 
     /**
      * Constructs a new Table object with no cards on it.
      */
-    public Table(){
-        this.cardsTable = new ArrayList<Card>();
-    }
+    public Table(){ this.cardsTable = new ArrayList<Card>(); }
 
     /**
      * Adds a card to the table.
@@ -24,6 +24,8 @@ public class Table {
      */
     public void addCardOnTheTable(Card card){
         this.cardsTable.add(card);
+        currentColor = card.getColor();
+        currentNum = card.getValue();
     }
 
     /**
@@ -38,4 +40,8 @@ public class Table {
         }
         return this.cardsTable.get(this.cardsTable.size()-1);
     }
+
+    public String getCurrentColor(){ return currentColor; }
+
+    public String getCurrentNum(){ return currentNum; }
 }

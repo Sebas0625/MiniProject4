@@ -2,6 +2,7 @@ package org.example.eiscuno.model.game;
 
 import org.example.eiscuno.model.card.Card;
 import org.example.eiscuno.model.player.Player;
+import org.example.eiscuno.model.table.Table;
 
 /**
  * Interface representing the Uno game functionality.
@@ -42,6 +43,14 @@ public interface IGameUno {
      * @return an array of cards that are currently visible to the human player
      */
     Card[] getCurrentVisibleCardsHumanPlayer(int posInitCardToShow);
+
+    Card[] getCurrentVisibleCardsMachinePLayer();
+
+    Player getMachinePlayer();
+
+    Player getHumanPlayer();
+
+    Table getTable();
 
     /**
      * Checks if the game is over.

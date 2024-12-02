@@ -29,6 +29,7 @@ public class GameUno implements IGameUno {
         this.machinePlayer = machinePlayer;
         this.deck = deck;
         this.table = table;
+        startGame();
     }
 
     /**
@@ -100,6 +101,34 @@ public class GameUno implements IGameUno {
         }
 
         return cards;
+    }
+
+    @Override
+    public Card[] getCurrentVisibleCardsMachinePLayer() {
+        int totalCards = this.machinePlayer.getCardsPlayer().size();
+        int numVisibleCards = Math.min(4, totalCards);
+        Card[] cards = new Card[numVisibleCards];
+
+        for (int i = 0; i < numVisibleCards; i++) {
+            cards[i] = this.machinePlayer.getCard(i);
+        }
+
+        return cards;
+    }
+
+    @Override
+    public Player getMachinePlayer(){
+        return machinePlayer;
+    }
+
+    @Override
+    public Player getHumanPlayer(){
+        return humanPlayer;
+    }
+
+    @Override
+    public Table getTable(){
+        return table;
     }
 
     /**
