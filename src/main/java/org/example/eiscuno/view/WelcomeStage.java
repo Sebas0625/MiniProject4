@@ -33,6 +33,8 @@ public class WelcomeStage extends Stage {
             // Re-throwing the caught IOException
             throw new IOException("Error while loading FXML file", e);
         }
+        this.welcomeController = loader.getController();
+
         Scene scene = new Scene(root);
         // Configuring the stage
         setTitle("EISC Uno"); // Sets the title of the stage

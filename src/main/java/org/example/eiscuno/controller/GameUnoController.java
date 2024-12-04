@@ -3,6 +3,7 @@ package org.example.eiscuno.controller;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
@@ -29,6 +30,9 @@ public class GameUnoController {
     @FXML
     private ImageView tableImageView;
 
+    @FXML
+    private Label machineCardsLabel;
+
     private Player humanPlayer;
     private Player machinePlayer;
     private Deck deck;
@@ -44,7 +48,7 @@ public class GameUnoController {
     public void initialize() {
         initVariables();
         printCardsHumanPlayer();
-        printCardsMachinePlayer(gridPaneCardsMachine, gameUno.getCurrentVisibleCardsMachinePLayer());
+        printCardsMachinePlayer();
         Card firstCard = deck.takeCard();
         table.addCardOnTheTable(firstCard);
         tableImageView.setImage(firstCard.getImage());
@@ -61,7 +65,7 @@ public class GameUnoController {
         this.table = new Table();
         this.gameUno = new GameUno(this.humanPlayer, this.machinePlayer, this.deck, this.table);
         this.posInitCardToShow = 0;
-        this.threadPlayMachine = new ThreadPlayMachine(gameUno, tableImageView, gridPaneCardsMachine);
+        this.threadPlayMachine = new ThreadPlayMachine(gameUno, tableImageView);
     }
 
     /**
@@ -82,27 +86,54 @@ public class GameUnoController {
                     humanPlayer.removeCard(findPosCardsHumanPlayer(card));
                     threadPlayMachine.setHasPLayerPlayed(true);
                     printCardsHumanPlayer();
+
+                    applyPower(card);
                 }
             });
             this.gridPaneCardsPlayer.add(cardImageView, i, 0);
         }
     }
 
-    public static void printCardsMachinePlayer(GridPane gridPaneCardsMachine, Card[] currentVisibleCardsMachinePlayer){
+    public void printCardsMachinePlayer(){
+        Card[] currentVisibleCardsMachinePlayer = this.gameUno.getCurrentVisibleCardsMachinePLayer();
             gridPaneCardsMachine.getChildren().clear();
             for (int i = 0; i < currentVisibleCardsMachinePlayer.length; i++){
                 Card card = currentVisibleCardsMachinePlayer[i];
                 ImageView cardImageView = card.getCard();
 
                 gridPaneCardsMachine.add(cardImageView, i , 0);
+
+                machineCardsLabel.setText("Cartas de la máquina: " + machinePlayer.getCardsPlayer().size());
             }
     }
 
-    public static boolean isCardPosible(Card card, Table table){
+    public boolean isCardPosible(Card card, Table table){
         return Objects.equals(table.getCurrentColor(), card.getColor())
                 || Objects.equals(table.getCurrentNum(), card.getValue())
                 || Objects.equals(card.getValue(), "WILD")
                 || Objects.equals(card.getValue(), "FOUR");
+    }
+
+    public void applyPower(Card card){
+        switch (card.getValue()){
+            case "FOUR":
+                gameUno.eatCard(humanPlayer, 4);
+                break;
+            case "TWO":
+                gameUno.eatCard(humanPlayer, 2);
+                break;
+            case "SKIP":
+                threadPlayMachine.setHasPLayerPlayed(true);
+                break;
+            case "WILD":
+
+                break;
+            case "REVERSE":
+
+                break;
+            default:
+                System.out.println("La carta no tiene ninguna habilidad");
+        }
     }
 
     /**
@@ -146,14 +177,10 @@ public class GameUnoController {
         }
     }
 
-    /**
-     * Handles the action of taking a card.
-     *
-     * @param event the action event
-     */
     @FXML
-    void onHandleTakeCard(ActionEvent event) {
-        // Implement logic to take a card here
+    void onHandleTakeCard() {
+        gameUno.eatCard(humanPlayer, 1);
+        printCardsHumanPlayer();
     }
 
     /**
