@@ -38,6 +38,7 @@ public class GameUnoStage extends Stage {
         // Configuring the stage
         setTitle("EISC Uno"); // Sets the title of the stage
         setScene(scene); // Sets the scene for the stage
+        scene.getStylesheets().add(getClass().getResource("/org/example/eiscuno/styles/game-uno-view-style.css").toExternalForm());
         setResizable(false); // Disallows resizing of the stage
         setOnCloseRequest(WindowEvent -> {
             WindowEvent.consume();

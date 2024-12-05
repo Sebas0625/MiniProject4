@@ -41,6 +41,10 @@ public class Table {
         return this.cardsTable.get(this.cardsTable.size()-1);
     }
 
+    public void setCurrentColor(String color){
+        this.currentColor = color;
+    }
+
     public String getCurrentColor(){ return currentColor; }
 
     public String getCurrentNum(){ return currentNum; }

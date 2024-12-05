@@ -1,12 +1,15 @@
 package org.example.eiscuno.controller;
 
-import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
+import javafx.scene.shape.Arc;
 import org.example.eiscuno.model.card.Card;
 import org.example.eiscuno.model.deck.Deck;
 import org.example.eiscuno.model.game.GameUno;
@@ -32,6 +35,12 @@ public class GameUnoController {
 
     @FXML
     private Label machineCardsLabel;
+
+    @FXML
+    private Label humanPlayerCardsLabel;
+
+    @FXML
+    private AnchorPane pieAnchorPane;
 
     private Player humanPlayer;
     private Player machinePlayer;
@@ -84,14 +93,16 @@ public class GameUnoController {
                     gameUno.playCard(card);
                     tableImageView.setImage(card.getImage());
                     humanPlayer.removeCard(findPosCardsHumanPlayer(card));
-                    threadPlayMachine.setHasPLayerPlayed(true);
                     printCardsHumanPlayer();
 
-                    applyPower(card);
+                    applyPower(machinePlayer, card);
+
+                    threadPlayMachine.setHasPLayerPlayed(true);
                 }
             });
             this.gridPaneCardsPlayer.add(cardImageView, i, 0);
         }
+        humanPlayerCardsLabel.setText("Tus cartas: " + humanPlayer.getCardsPlayer().size());
     }
 
     public void printCardsMachinePlayer(){
@@ -114,25 +125,32 @@ public class GameUnoController {
                 || Objects.equals(card.getValue(), "FOUR");
     }
 
-    public void applyPower(Card card){
-        switch (card.getValue()){
+    public void applyPower(Player targetPlayer, Card card){
+        switch (card.getValue()) {
             case "FOUR":
-                gameUno.eatCard(humanPlayer, 4);
+                gameUno.eatCard(targetPlayer, 4);
+                pieAnchorPane.setVisible(true);
+                // dormir mientras se selecciona el color
                 break;
             case "TWO":
-                gameUno.eatCard(humanPlayer, 2);
+                gameUno.eatCard(targetPlayer, 2);
+                // Crear un thread para cuando se lanzan cartas de comer
                 break;
             case "SKIP":
-                threadPlayMachine.setHasPLayerPlayed(true);
+                if (targetPlayer == humanPlayer){
+                    threadPlayMachine.setHasPLayerPlayed(true);
+                } else{
+                    // dormir mientras el jugador hace otra jugada
+                }
                 break;
             case "WILD":
-
+                pieAnchorPane.setVisible(true);
+                // dormir mientras se selecciona el color
                 break;
             case "REVERSE":
-
                 break;
             default:
-                System.out.println("La carta no tiene ninguna habilidad");
+                System.out.println("La carta no tiene ninguna característica");
         }
     }
 
@@ -149,6 +167,25 @@ public class GameUnoController {
             }
         }
         return -1;
+    }
+
+    public void setDisableHumanPlayerCards(boolean value){
+        gridPaneCardsPlayer.setDisable(value);
+    }
+
+    public void handleColorSelection(ActionEvent event){
+        Arc arc = (Arc) event.getSource();
+        Paint color = arc.getFill();
+        if (color == Color.RED){
+            table.setCurrentColor("RED");
+        } else if(color == Color.BLUE){
+            table.setCurrentColor("BLUE");
+        } else if(color == Color.GREEN){
+            table.setCurrentColor("GREEN");
+        } else if(color == Color.YELLOW){
+            table.setCurrentColor("YELLOW");
+        }
+        pieAnchorPane.setVisible(false);
     }
 
     /**

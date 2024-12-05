@@ -4,19 +4,21 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.shape.Arc?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: orange;" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.eiscuno.controller.GameUnoController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="487.0" prefWidth="755.0" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.eiscuno.controller.GameUnoController">
    <left>
       <Pane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
          <children>
-            <ImageView fitHeight="211.0" fitWidth="141.0" layoutX="14.0" onMouseClicked="#onHandleTakeCard" pickOnBounds="true" preserveRatio="true">
+            <ImageView fitHeight="211.0" fitWidth="141.0" layoutX="30.0" layoutY="39.0" onMouseClicked="#onHandleTakeCard" pickOnBounds="true" preserveRatio="true">
                <image>
                   <Image url="@../cards-uno/deck_of_cards.png" />
                </image>
@@ -27,15 +29,16 @@
    <right>
       <Pane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
          <children>
-            <Button layoutX="50.0" layoutY="75.0" mnemonicParsing="false" onAction="#onHandleUno" prefHeight="50.0" prefWidth="100.0" text="UNO" />
+            <Button layoutX="50.0" layoutY="115.0" mnemonicParsing="false" onAction="#onHandleUno" prefHeight="50.0" prefWidth="100.0" text="UNO" />
          </children>
       </Pane>
    </right>
    <center>
       <Pane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
          <children>
-            <Label fx:id="machineCardsLabel" layoutX="34.0" layoutY="-8.0" prefHeight="17.0" prefWidth="132.0" text="Cartas de la máquina: " />
-            <ImageView fx:id="tableImageView" fitHeight="149.0" fitWidth="100.0" layoutX="50.0" layoutY="30.0" pickOnBounds="true" preserveRatio="true" />
+            <Label fx:id="machineCardsLabel" alignment="CENTER" contentDisplay="CENTER" layoutX="112.0" layoutY="-8.0" prefHeight="17.0" prefWidth="132.0" text="Cartas de la máquina: " wrapText="true" />
+            <Label fx:id="humanPlayerCardsLabel" alignment="CENTER" contentDisplay="CENTER" layoutX="112.0" layoutY="272.0" prefHeight="17.0" prefWidth="132.0" text="Tus cartas:" textAlignment="CENTER" wrapText="true" />
+            <ImageView fx:id="tableImageView" fitHeight="171.0" fitWidth="141.0" layoutX="107.0" layoutY="68.0" pickOnBounds="true" preserveRatio="true" />
             <GridPane gridLinesVisible="true" layoutY="48.0" prefHeight="105.0" prefWidth="200.0" visible="false">
               <columnConstraints>
                 <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
@@ -46,6 +49,14 @@
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
               </rowConstraints>
             </GridPane>
+            <AnchorPane fx:id="pieAnchorPane" layoutX="71.0" layoutY="40.0" prefHeight="200.0" prefWidth="200.0" visible="false">
+               <children>
+                  <Arc fill="#0d00ff" layoutX="115.0" layoutY="100.0" length="90.0" onMouseClicked="#handleColorSelection" radiusX="100.0" radiusY="100.0" startAngle="45.0" stroke="BLACK" strokeType="INSIDE" type="ROUND" />
+                  <Arc fill="#d10000" layoutX="115.0" layoutY="100.0" length="90.0" onMouseClicked="#handleColorSelection" radiusX="100.0" radiusY="100.0" startAngle="135.0" stroke="BLACK" strokeType="INSIDE" type="ROUND" />
+                  <Arc fill="#fff600" layoutX="115.0" layoutY="100.0" length="90.0" onMouseClicked="#handleColorSelection" radiusX="100.0" radiusY="100.0" startAngle="225.0" stroke="BLACK" strokeType="INSIDE" type="ROUND" />
+                  <Arc fill="#00ff04" layoutX="115.0" layoutY="100.0" length="90.0" onMouseClicked="#handleColorSelection" radiusX="100.0" radiusY="100.0" startAngle="315.0" stroke="BLACK" strokeType="INSIDE" type="ROUND" />
+               </children>
+            </AnchorPane>
          </children>
       </Pane>
    </center>
@@ -73,7 +84,7 @@
       </HBox>
    </top>
    <bottom>
-      <HBox alignment="CENTER" prefHeight="100.0" prefWidth="610.0" BorderPane.alignment="CENTER">
+      <HBox alignment="CENTER" prefHeight="106.0" prefWidth="759.0" BorderPane.alignment="CENTER">
          <children>
             <Button mnemonicParsing="false" onAction="#onHandleBack" prefWidth="74.0" style="-fx-background-color: red;" text="Anterior" textFill="WHITE">
                <font>

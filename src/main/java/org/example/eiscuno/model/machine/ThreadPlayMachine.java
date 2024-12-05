@@ -27,14 +27,11 @@ public class ThreadPlayMachine extends Thread{
         while (true){
             if (hasPLayerPlayed){
                 try {
+                    GameUnoStage.getInstance().getGameUnoController().setDisableHumanPlayerCards(true);
                     Thread.sleep((long) (/*Math.random() */ 3000));
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-                try {
                     putCardOnTheTable();
                     setHasPLayerPlayed(false);
-                } catch (IOException e){
+                } catch (IOException | InterruptedException e){
                     e.printStackTrace();
                 }
             }
@@ -63,6 +60,7 @@ public class ThreadPlayMachine extends Thread{
                 if (gameUnoController.isCardPosible(card, table)){
                     index = i;
                     foundValidCard = true;
+                    break;
                 }
             }
         } else{
@@ -72,6 +70,7 @@ public class ThreadPlayMachine extends Thread{
         // if machine has no valid cards, eats until finds any valid one
         while (!foundValidCard){
             gameUno.eatCard(machinePlayer, 1);
+            System.out.println("La máquina ha comido una carta");
             if (gameUnoController.isCardPosible(machinePlayer.getCard(machinePlayer.getCardsPlayer().size() - 1), table)){
                 foundValidCard = true;
             }
@@ -83,6 +82,7 @@ public class ThreadPlayMachine extends Thread{
         tableImageView.setImage(card.getImage());
         machinePlayer.removeCard(index);
 
+        gameUnoController.setDisableHumanPlayerCards(false);
         Platform.runLater(gameUnoController::printCardsMachinePlayer);
     }
 

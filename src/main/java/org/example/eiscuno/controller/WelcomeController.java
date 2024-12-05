@@ -5,7 +5,6 @@ import javafx.event.ActionEvent;
 import org.example.eiscuno.view.GameUnoStage;
 import org.example.eiscuno.view.WelcomeStage;
 
-import javax.swing.*;
 import java.io.IOException;
 
 public class WelcomeController {

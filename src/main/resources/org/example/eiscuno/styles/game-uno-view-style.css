@@ -1,0 +1,5 @@
+.root {
+    -fx-background-image: url("../images/game_background.jpg") format("truetype");
+    -fx-background-size: cover;
+    -fx-background-position: center;
+}

@@ -1,0 +1,40 @@
+@font-face {
+    font-family: 'uno_font';
+    src: url('../fonts/Cabin-Bold.ttf');
+}
+
+.root {
+    -fx-background-image: url("../images/background_uno.png") format("truetype");
+    -fx-background-size: cover;
+    -fx-background-position: center;
+}
+
+.button {
+    -fx-background-color: transparent;
+    -fx-font-weight: 100;
+    -fx-font-size: 24px;
+    -fx-border-color: transparent;
+}
+
+.playButton {
+    -fx-alignment: center;
+    -fx-font-family: 'Cabin Bold';
+    -fx-font-size: 40px;
+}
+
+.secondaryButton {
+    -fx-font-family: 'Cabin Bold';
+    -fx-font-size: 25px;
+}
+
+.playButton {
+    -fx-font-family: 'Cabin Bold';
+    -fx-font-size: 40px;
+}
+
+.button:hover {
+    -fx-cursor: hand;
+    -fx-scale-x: 1.1;
+    -fx-scale-y: 1.1;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 15, 0.7, 0, 0);
+}
