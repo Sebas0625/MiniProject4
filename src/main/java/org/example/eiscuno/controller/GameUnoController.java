@@ -17,6 +17,7 @@ import org.example.eiscuno.model.machine.ThreadPlayMachine;
 import org.example.eiscuno.model.player.Player;
 import org.example.eiscuno.model.table.Table;
 
+import javax.sound.sampled.FloatControl;
 import java.util.Objects;
 
 /**
@@ -96,8 +97,6 @@ public class GameUnoController {
                     printCardsHumanPlayer();
 
                     applyPower(machinePlayer, card);
-
-                    threadPlayMachine.setHasPLayerPlayed(true);
                 }
             });
             this.gridPaneCardsPlayer.add(cardImageView, i, 0);
@@ -130,7 +129,7 @@ public class GameUnoController {
             case "FOUR":
                 gameUno.eatCard(targetPlayer, 4);
                 pieAnchorPane.setVisible(true);
-                // dormir mientras se selecciona el color
+                freezePlayMachineThread();
                 break;
             case "TWO":
                 gameUno.eatCard(targetPlayer, 2);
@@ -139,17 +138,16 @@ public class GameUnoController {
             case "SKIP":
                 if (targetPlayer == humanPlayer){
                     threadPlayMachine.setHasPLayerPlayed(true);
-                } else{
-                    // dormir mientras el jugador hace otra jugada
                 }
                 break;
             case "WILD":
                 pieAnchorPane.setVisible(true);
-                // dormir mientras se selecciona el color
+                freezePlayMachineThread();
                 break;
             case "REVERSE":
                 break;
             default:
+                threadPlayMachine.setHasPLayerPlayed(true);
                 System.out.println("La carta no tiene ninguna característica");
         }
     }
@@ -186,6 +184,23 @@ public class GameUnoController {
             table.setCurrentColor("YELLOW");
         }
         pieAnchorPane.setVisible(false);
+        notifyPlayMachineThread();
+    }
+
+    private void freezePlayMachineThread(){
+        synchronized (threadPlayMachine){
+            try{
+                threadPlayMachine.wait();
+            } catch (InterruptedException e){
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void notifyPlayMachineThread(){
+        synchronized (threadPlayMachine){
+            threadPlayMachine.notify();
+        }
     }
 
     /**
