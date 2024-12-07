@@ -1,15 +1,22 @@
 package org.example.eiscuno.controller;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
+import javafx.util.Duration;
 import org.example.eiscuno.model.card.Card;
 import org.example.eiscuno.model.deck.Deck;
 import org.example.eiscuno.model.game.GameUno;
+import org.example.eiscuno.model.machine.ThreadSingUNOMachine;
 import org.example.eiscuno.model.player.Player;
 import org.example.eiscuno.model.table.Table;
+
+import java.util.Objects;
 
 /**
  * Controller class for the Uno game.
@@ -25,6 +32,15 @@ public class GameUnoController {
     @FXML
     private ImageView tableImageView;
 
+    @FXML
+    private Button buttonUNO;
+
+    @FXML
+    private ImageView adviseUnoPlayer;
+
+    @FXML
+    private ImageView adviseUnoMachine;
+
     private Player humanPlayer;
     private Player machinePlayer;
     private Deck deck;
@@ -32,6 +48,7 @@ public class GameUnoController {
     private GameUno gameUno;
     private int posInitCardToShow;
 
+    private ThreadSingUNOMachine threadSingUNOMachine;
     /**
      * Initializes the controller.
      */
@@ -40,6 +57,13 @@ public class GameUnoController {
         initVariables();
         this.gameUno.startGame();
         printCardsHumanPlayer();
+        buttonUNO.setDisable(true);
+
+        threadSingUNOMachine = new ThreadSingUNOMachine(this.gameUno, this);
+        Thread t = new Thread(threadSingUNOMachine, "ThreadSingUNO");
+        // Convert the thread to a daemon thread
+        t.setDaemon(true); // Alternativa para que el programa cierre junto con el hilo.
+        t.start();
     }
 
     /**
@@ -70,6 +94,13 @@ public class GameUnoController {
                 gameUno.playCard(card);
                 tableImageView.setImage(card.getImage());
                 humanPlayer.removeCard(findPosCardsHumanPlayer(card));
+
+                // Se verifica el numero de cartas del jugador
+                checkNumberCards(humanPlayer.getCardsPlayer().size(), humanPlayer.getTypePlayer());
+                // se verifica el numero de cartas de la maquina, pero este metodo debe ser llamado desde
+                // el metodo donde la maquina agrega sus sus cartas, !!!!!!!!!!
+                checkNumberCards(machinePlayer.getCardsPlayer().size(), machinePlayer.getTypePlayer());
+
                 printCardsHumanPlayer();
             });
 
@@ -135,6 +166,48 @@ public class GameUnoController {
      */
     @FXML
     void onHandleUno(ActionEvent event) {
-        // Implement logic to handle Uno event here
+        // Se impide que en la Clase ThreadSingUnoMachine, se agregue una carta, ya que el boton uno ha sido presionado
+        threadSingUNOMachine.setButtonUNOPressed(true);
+        showAdviseUnoTemporarily(adviseUnoPlayer);
+    }
+
+    /**
+     * Updates visible cards in the player's hand
+     */
+    public void updateVisibleCardsHumanPlayer() {
+        printCardsHumanPlayer();
+    }
+
+    // Verifica que el numero de cartas del jugador humano o maquina tengan una sola carta
+    public void checkNumberCards(int numberCards, String typePlayer) {
+        if(numberCards == 1){
+            if(Objects.equals(typePlayer, "HUMAN_PLAYER")){
+                // Se habilita el boton uno
+                setDisableButton(false);
+                // Activa la ejecución del hilo
+                threadSingUNOMachine.setRunning(true);
+                // Se da permiso a la variable booleana en la Clase ThreadSingUnoMachine, para que el metodo pueda agregar
+                // a la mano del jugador una carta si este no ha presionado el boton uno.
+                threadSingUNOMachine.setButtonUNOPressed(false);
+            }
+            else{
+                showAdviseUnoTemporarily(adviseUnoMachine);
+            }
+        }
+    }
+
+    public void setDisableButton(boolean disable){
+        buttonUNO.setDisable(disable);
+    }
+
+    // Muestra un aviso temporal si el jugador ha presionado uno o la maquina ha dicho uno
+    private void showAdviseUnoTemporarily(ImageView adviseUno) {
+        adviseUno.setVisible(true);
+        Timeline timeline = new Timeline(new KeyFrame(
+                Duration.seconds(2),
+                event -> adviseUno.setVisible(false)
+        ));
+        timeline.setCycleCount(1);
+        timeline.play(); // Start animation
     }
 }
