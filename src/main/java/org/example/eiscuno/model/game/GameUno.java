@@ -29,7 +29,7 @@ public class GameUno implements IGameUno {
         this.machinePlayer = machinePlayer;
         this.deck = deck;
         this.table = table;
-        startGame();
+//        startGame();
     }
 
     /**
@@ -39,10 +39,13 @@ public class GameUno implements IGameUno {
     @Override
     public void startGame() {
         for (int i = 0; i < 10; i++) {
+            Card card = this.deck.takeCard(); // Toma una carta del mazo
             if (i < 5) {
-                humanPlayer.addCard(this.deck.takeCard());
+                humanPlayer.addCard(card); // Añade la carta al jugador humano
+                System.out.println("Carta del jugador.");
             } else {
-                machinePlayer.addCard(this.deck.takeCard());
+                machinePlayer.addCard(card); // Añade la carta a la máquina
+                System.out.println("Carta de la maquina.");
             }
         }
     }
@@ -130,6 +133,8 @@ public class GameUno implements IGameUno {
     public Table getTable(){
         return table;
     }
+
+    public Deck getDeck() {return deck;}
 
     /**
      * Checks if the game is over.

@@ -105,17 +105,19 @@ public class GameUnoController {
 
 
     private void startGameWithAnimation() {
-        for (int i = 0; i < 10; i++) {
-            if (i < 5) {
-                Card card = deck.takeCard();
-                humanPlayer.addCard(card);
-                animateCardDeal(card, gridPaneCardsPlayer, i); // Animación para el jugador humano
-            } else {
-                Card card = deck.takeCard();
-                machinePlayer.addCard(card);
-                animateCardDeal(card, gridPaneCardsMachine, i - 5); // Animación para la máquina
-            }
+        // Llamar al metodo de reparto de cartas en GameUno
+        gameUno.startGame();
+
+        // Animar las cartas que se han repartido
+        for (int i = 0; i < 5; i++) {
+            Card humanCard = humanPlayer.getCard(i);
+            animateCardDeal(humanCard, gridPaneCardsPlayer, i); // Animación para el jugador humano
         }
+        for (int i = 0; i < 5; i++) {
+            Card machineCard = machinePlayer.getCard(i);
+            animateCardDeal(machineCard, gridPaneCardsMachine, i); // Animación para la máquina
+        }
+
         // PauseTransition para esperar un tiempo después de la animación
         PauseTransition pause = new PauseTransition(Duration.seconds(2)); // Esperar 2 segundos
         pause.setOnFinished(event -> {
@@ -125,10 +127,11 @@ public class GameUnoController {
             printCardsHumanPlayer();
             printCardsMachinePlayer();
 
-            Card firstCard = deck.takeCard(); // Toma la primera carta
+            // Toma la primera carta del mazo y la coloca en la mesa
+            Card firstCard = gameUno.getDeck().takeCard(); // Asegúrate de que el método getDeck() esté disponible
             table.addCardOnTheTable(firstCard); // Añade la carta a la mesa
             tableImageView.setImage(firstCard.getImage()); // Muestra la carta en la interfaz
-            threadPlayMachine.start();// Inicia el hilo de la máquina
+            threadPlayMachine.start(); // Inicia el hilo de la máquina
             System.out.println("Pausa finalizada, procediendo con el juego.");
         });
         pause.play();
