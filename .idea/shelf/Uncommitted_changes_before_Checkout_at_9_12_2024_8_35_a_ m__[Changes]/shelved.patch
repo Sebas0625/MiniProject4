@@ -1,0 +1,113 @@
+Index: src/main/java/org/example/eiscuno/controller/GameUnoController.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package org.example.eiscuno.controller;\r\n\r\nimport javafx.event.ActionEvent;\r\nimport javafx.fxml.FXML;\r\nimport javafx.scene.control.Label;\r\nimport javafx.scene.image.ImageView;\r\nimport javafx.scene.input.MouseEvent;\r\nimport javafx.scene.layout.AnchorPane;\r\nimport javafx.scene.layout.GridPane;\r\nimport javafx.scene.paint.Color;\r\nimport javafx.scene.paint.Paint;\r\nimport javafx.scene.shape.Arc;\r\nimport org.example.eiscuno.model.card.Card;\r\nimport org.example.eiscuno.model.deck.Deck;\r\nimport org.example.eiscuno.model.game.GameUno;\r\nimport org.example.eiscuno.model.machine.ThreadPlayMachine;\r\nimport org.example.eiscuno.model.player.Player;\r\nimport org.example.eiscuno.model.table.Table;\r\n\r\nimport javax.sound.sampled.FloatControl;\r\nimport java.util.Objects;\r\n\r\n/**\r\n * Controller class for the Uno game.\r\n */\r\npublic class GameUnoController {\r\n\r\n    @FXML\r\n    private GridPane gridPaneCardsMachine;\r\n\r\n    @FXML\r\n    private GridPane gridPaneCardsPlayer;\r\n\r\n    @FXML\r\n    private ImageView tableImageView;\r\n\r\n    @FXML\r\n    private Label machineCardsLabel;\r\n\r\n    @FXML\r\n    private Label humanPlayerCardsLabel;\r\n\r\n    @FXML\r\n    private AnchorPane pieAnchorPane;\r\n\r\n    private Player humanPlayer;\r\n    private Player machinePlayer;\r\n    private Deck deck;\r\n    private Table table;\r\n    private GameUno gameUno;\r\n    private int posInitCardToShow;\r\n    private ThreadPlayMachine threadPlayMachine;\r\n\r\n    /**\r\n     * Initializes the controller.\r\n     */\r\n    @FXML\r\n    public void initialize() {\r\n        initVariables();\r\n        printCardsHumanPlayer();\r\n        printCardsMachinePlayer();\r\n        Card firstCard = deck.takeCard();\r\n        table.addCardOnTheTable(firstCard);\r\n        tableImageView.setImage(firstCard.getImage());\r\n        threadPlayMachine.start();\r\n    }\r\n\r\n    /**\r\n     * Initializes the variables for the game.\r\n     */\r\n    private void initVariables() {\r\n        this.humanPlayer = new Player(\"HUMAN_PLAYER\");\r\n        this.machinePlayer = new Player(\"MACHINE_PLAYER\");\r\n        this.deck = new Deck();\r\n        this.table = new Table();\r\n        this.gameUno = new GameUno(this.humanPlayer, this.machinePlayer, this.deck, this.table);\r\n        this.posInitCardToShow = 0;\r\n        this.threadPlayMachine = new ThreadPlayMachine(gameUno, tableImageView);\r\n    }\r\n\r\n    /**\r\n     * Prints the human player's cards on the grid pane.\r\n     */\r\n    private void printCardsHumanPlayer() {\r\n        this.gridPaneCardsPlayer.getChildren().clear();\r\n        Card[] currentVisibleCardsHumanPlayer = this.gameUno.getCurrentVisibleCardsHumanPlayer(this.posInitCardToShow);\r\n\r\n        for (int i = 0; i < currentVisibleCardsHumanPlayer.length; i++) {\r\n            Card card = currentVisibleCardsHumanPlayer[i];\r\n            ImageView cardImageView = card.getCard();\r\n\r\n            cardImageView.setOnMouseClicked((MouseEvent event) -> {\r\n                if (isCardPosible(card, table)){\r\n                    gameUno.playCard(card);\r\n                    tableImageView.setImage(card.getImage());\r\n                    humanPlayer.removeCard(findPosCardsHumanPlayer(card));\r\n                    printCardsHumanPlayer();\r\n\r\n                    applyPower(machinePlayer, card);\r\n                }\r\n            });\r\n            this.gridPaneCardsPlayer.add(cardImageView, i, 0);\r\n        }\r\n        humanPlayerCardsLabel.setText(\"Tus cartas: \" + humanPlayer.getCardsPlayer().size());\r\n    }\r\n\r\n    public void printCardsMachinePlayer(){\r\n        Card[] currentVisibleCardsMachinePlayer = this.gameUno.getCurrentVisibleCardsMachinePLayer();\r\n            gridPaneCardsMachine.getChildren().clear();\r\n            for (int i = 0; i < currentVisibleCardsMachinePlayer.length; i++){\r\n                Card card = currentVisibleCardsMachinePlayer[i];\r\n                ImageView cardImageView = card.getCard();\r\n\r\n                gridPaneCardsMachine.add(cardImageView, i , 0);\r\n\r\n                machineCardsLabel.setText(\"Cartas de la máquina: \" + machinePlayer.getCardsPlayer().size());\r\n            }\r\n    }\r\n\r\n    public boolean isCardPosible(Card card, Table table){\r\n        return Objects.equals(table.getCurrentColor(), card.getColor())\r\n                || Objects.equals(table.getCurrentNum(), card.getValue())\r\n                || Objects.equals(card.getValue(), \"WILD\")\r\n                || Objects.equals(card.getValue(), \"FOUR\");\r\n    }\r\n\r\n    public void applyPower(Player targetPlayer, Card card){\r\n        switch (card.getValue()) {\r\n            case \"FOUR\":\r\n                gameUno.eatCard(targetPlayer, 4);\r\n                pieAnchorPane.setVisible(true);\r\n                freezePlayMachineThread();\r\n                break;\r\n            case \"TWO\":\r\n                gameUno.eatCard(targetPlayer, 2);\r\n                // Crear un thread para cuando se lanzan cartas de comer\r\n                break;\r\n            case \"SKIP\":\r\n                if (targetPlayer == humanPlayer){\r\n                    threadPlayMachine.setHasPLayerPlayed(true);\r\n                }\r\n                break;\r\n            case \"WILD\":\r\n                pieAnchorPane.setVisible(true);\r\n                freezePlayMachineThread();\r\n                break;\r\n            case \"REVERSE\":\r\n                break;\r\n            default:\r\n                threadPlayMachine.setHasPLayerPlayed(true);\r\n                System.out.println(\"La carta no tiene ninguna característica\");\r\n        }\r\n    }\r\n\r\n    /**\r\n     * Finds the position of a specific card in the human player's hand.\r\n     *\r\n     * @param card the card to find\r\n     * @return the position of the card, or -1 if not found\r\n     */\r\n    private Integer findPosCardsHumanPlayer(Card card) {\r\n        for (int i = 0; i < this.humanPlayer.getCardsPlayer().size(); i++) {\r\n            if (this.humanPlayer.getCardsPlayer().get(i).equals(card)) {\r\n                return i;\r\n            }\r\n        }\r\n        return -1;\r\n    }\r\n\r\n    public void setDisableHumanPlayerCards(boolean value){\r\n        gridPaneCardsPlayer.setDisable(value);\r\n    }\r\n\r\n    public void handleColorSelection(ActionEvent event){\r\n        Arc arc = (Arc) event.getSource();\r\n        Paint color = arc.getFill();\r\n        if (color == Color.RED){\r\n            table.setCurrentColor(\"RED\");\r\n        } else if(color == Color.BLUE){\r\n            table.setCurrentColor(\"BLUE\");\r\n        } else if(color == Color.GREEN){\r\n            table.setCurrentColor(\"GREEN\");\r\n        } else if(color == Color.YELLOW){\r\n            table.setCurrentColor(\"YELLOW\");\r\n        }\r\n        pieAnchorPane.setVisible(false);\r\n        notifyPlayMachineThread();\r\n    }\r\n\r\n    private void freezePlayMachineThread(){\r\n        synchronized (threadPlayMachine){\r\n            try{\r\n                threadPlayMachine.wait();\r\n            } catch (InterruptedException e){\r\n                e.printStackTrace();\r\n            }\r\n        }\r\n    }\r\n\r\n    private void notifyPlayMachineThread(){\r\n        synchronized (threadPlayMachine){\r\n            threadPlayMachine.notify();\r\n        }\r\n    }\r\n\r\n    /**\r\n     * Handles the \"Back\" button action to show the previous set of cards.\r\n     *\r\n     * @param event the action event\r\n     */\r\n    @FXML\r\n    void onHandleBack(ActionEvent event) {\r\n        if (this.posInitCardToShow > 0) {\r\n            this.posInitCardToShow--;\r\n            printCardsHumanPlayer();\r\n        }\r\n    }\r\n\r\n    /**\r\n     * Handles the \"Next\" button action to show the next set of cards.\r\n     *\r\n     * @param event the action event\r\n     */\r\n    @FXML\r\n    void onHandleNext(ActionEvent event) {\r\n        if (this.posInitCardToShow < this.humanPlayer.getCardsPlayer().size() - 4) {\r\n            this.posInitCardToShow++;\r\n            printCardsHumanPlayer();\r\n        }\r\n    }\r\n\r\n    @FXML\r\n    void onHandleTakeCard() {\r\n        gameUno.eatCard(humanPlayer, 1);\r\n        printCardsHumanPlayer();\r\n    }\r\n\r\n    /**\r\n     * Handles the action of saying \"Uno\".\r\n     *\r\n     * @param event the action event\r\n     */\r\n    @FXML\r\n    void onHandleUno(ActionEvent event) {\r\n        // Implement logic to handle Uno event here\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/org/example/eiscuno/controller/GameUnoController.java b/src/main/java/org/example/eiscuno/controller/GameUnoController.java
+--- a/src/main/java/org/example/eiscuno/controller/GameUnoController.java	(revision 599118e6135d33bd119e81930b74a6e5dd077756)
++++ b/src/main/java/org/example/eiscuno/controller/GameUnoController.java	(date 1733751098072)
+@@ -10,12 +10,15 @@
+ import javafx.scene.paint.Color;
+ import javafx.scene.paint.Paint;
+ import javafx.scene.shape.Arc;
++import javafx.util.Duration;
+ import org.example.eiscuno.model.card.Card;
+ import org.example.eiscuno.model.deck.Deck;
+ import org.example.eiscuno.model.game.GameUno;
+ import org.example.eiscuno.model.machine.ThreadPlayMachine;
+ import org.example.eiscuno.model.player.Player;
+ import org.example.eiscuno.model.table.Table;
++import javafx.animation.FadeTransition;
++import javafx.animation.TranslateTransition;
+ 
+ import javax.sound.sampled.FloatControl;
+ import java.util.Objects;
+@@ -59,10 +62,12 @@
+         initVariables();
+         printCardsHumanPlayer();
+         printCardsMachinePlayer();
++        startGameWithAnimation(); // Llamar a la función que inicia el juego con animaciones
+         Card firstCard = deck.takeCard();
+         table.addCardOnTheTable(firstCard);
+         tableImageView.setImage(firstCard.getImage());
+         threadPlayMachine.start();
++
+     }
+ 
+     /**
+@@ -78,6 +83,53 @@
+         this.threadPlayMachine = new ThreadPlayMachine(gameUno, tableImageView);
+     }
+ 
++    public void discardCard(Card card) {
++        animateCardDiscard(card); // Llamar a la animación
++    }
++
++    private void animateCardDiscard(Card card) {
++        ImageView cardImageView = card.getCard();
++        cardImageView.setOpacity(1);
++        tableImageView.setImage(card.getImage());
++
++        // Animación de movimiento
++        TranslateTransition translate = new TranslateTransition(Duration.seconds(0.5), cardImageView);
++        translate.setFromX(tableImageView.getLayoutX());
++        translate.setFromY(tableImageView.getLayoutY());
++        translate.setToX(tableImageView.getLayoutX() + 50); // Ajustar la posición de descarte
++        translate.setToY(tableImageView.getLayoutY() + 50);
++        translate.play();
++    }
++
++
++
++    private void startGameWithAnimation() {
++        for (int i = 0; i < 10; i++) {
++            if (i < 5) {
++                Card card = deck.takeCard();
++                humanPlayer.addCard(card);
++                animateCardDeal(card, gridPaneCardsPlayer, i); // Animación para el jugador humano
++            } else {
++                Card card = deck.takeCard();
++                machinePlayer.addCard(card);
++                animateCardDeal(card, gridPaneCardsMachine, i - 5); // Animación para la máquina
++            }
++        }
++    }
++
++    private void animateCardDeal(Card card, GridPane gridPane, int position) {
++        ImageView cardImageView = card.getCard();
++        cardImageView.setOpacity(0); // Comenzar invisible
++        gridPane.add(cardImageView, position, 0);
++
++        // Animación
++        FadeTransition fadeIn = new FadeTransition(Duration.seconds(0.5), cardImageView);
++        fadeIn.setFromValue(0);
++        fadeIn.setToValue(1);
++        fadeIn.setDelay(Duration.seconds(position * 0.2)); // Retraso para cada carta
++        fadeIn.play();
++    }
++
+     /**
+      * Prints the human player's cards on the grid pane.
+      */
+Index: .idea/misc.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"ExternalStorageConfigurationManager\" enabled=\"true\" />\r\n  <component name=\"MavenProjectsManager\">\r\n    <option name=\"originalFiles\">\r\n      <list>\r\n        <option value=\"$PROJECT_DIR$/pom.xml\" />\r\n      </list>\r\n    </option>\r\n  </component>\r\n  <component name=\"ProjectRootManager\" version=\"2\" languageLevel=\"JDK_22\" default=\"true\" project-jdk-name=\"corretto-17\" project-jdk-type=\"JavaSDK\">\r\n    <output url=\"file://$PROJECT_DIR$/out\" />\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/misc.xml b/.idea/misc.xml
+--- a/.idea/misc.xml	(revision 599118e6135d33bd119e81930b74a6e5dd077756)
++++ b/.idea/misc.xml	(date 1733751108472)
+@@ -8,7 +8,7 @@
+       </list>
+     </option>
+   </component>
+-  <component name="ProjectRootManager" version="2" languageLevel="JDK_22" default="true" project-jdk-name="corretto-17" project-jdk-type="JavaSDK">
++  <component name="ProjectRootManager" version="2" languageLevel="JDK_17" default="true" project-jdk-name="corretto-17" project-jdk-type="JavaSDK">
+     <output url="file://$PROJECT_DIR$/out" />
+   </component>
+ </project>
+\ No newline at end of file

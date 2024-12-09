@@ -1,0 +1,132 @@
+Index: src/main/java/org/example/eiscuno/controller/GameUnoController.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package org.example.eiscuno.controller;\r\n\r\nimport javafx.event.ActionEvent;\r\nimport javafx.fxml.FXML;\r\nimport javafx.scene.control.Label;\r\nimport javafx.scene.image.ImageView;\r\nimport javafx.scene.input.MouseEvent;\r\nimport javafx.scene.layout.AnchorPane;\r\nimport javafx.scene.layout.GridPane;\r\nimport javafx.scene.paint.Color;\r\nimport javafx.scene.paint.Paint;\r\nimport javafx.scene.shape.Arc;\r\nimport org.example.eiscuno.model.card.Card;\r\nimport org.example.eiscuno.model.deck.Deck;\r\nimport org.example.eiscuno.model.game.GameUno;\r\nimport org.example.eiscuno.model.machine.ThreadPlayMachine;\r\nimport org.example.eiscuno.model.player.Player;\r\nimport org.example.eiscuno.model.table.Table;\r\n\r\nimport javax.sound.sampled.FloatControl;\r\nimport java.util.Objects;\r\n\r\n/**\r\n * Controller class for the Uno game.\r\n */\r\npublic class GameUnoController {\r\n\r\n    @FXML\r\n    private GridPane gridPaneCardsMachine;\r\n\r\n    @FXML\r\n    private GridPane gridPaneCardsPlayer;\r\n\r\n    @FXML\r\n    private ImageView tableImageView;\r\n\r\n    @FXML\r\n    private Label machineCardsLabel;\r\n\r\n    @FXML\r\n    private Label humanPlayerCardsLabel;\r\n\r\n    @FXML\r\n    private AnchorPane pieAnchorPane;\r\n\r\n    private Player humanPlayer;\r\n    private Player machinePlayer;\r\n    private Deck deck;\r\n    private Table table;\r\n    private GameUno gameUno;\r\n    private int posInitCardToShow;\r\n    private ThreadPlayMachine threadPlayMachine;\r\n\r\n    /**\r\n     * Initializes the controller.\r\n     */\r\n    @FXML\r\n    public void initialize() {\r\n        initVariables();\r\n        printCardsHumanPlayer();\r\n        printCardsMachinePlayer();\r\n        Card firstCard = deck.takeCard();\r\n        table.addCardOnTheTable(firstCard);\r\n        tableImageView.setImage(firstCard.getImage());\r\n        threadPlayMachine.start();\r\n    }\r\n\r\n    /**\r\n     * Initializes the variables for the game.\r\n     */\r\n    private void initVariables() {\r\n        this.humanPlayer = new Player(\"HUMAN_PLAYER\");\r\n        this.machinePlayer = new Player(\"MACHINE_PLAYER\");\r\n        this.deck = new Deck();\r\n        this.table = new Table();\r\n        this.gameUno = new GameUno(this.humanPlayer, this.machinePlayer, this.deck, this.table);\r\n        this.posInitCardToShow = 0;\r\n        this.threadPlayMachine = new ThreadPlayMachine(gameUno, tableImageView);\r\n    }\r\n\r\n    /**\r\n     * Prints the human player's cards on the grid pane.\r\n     */\r\n    private void printCardsHumanPlayer() {\r\n        this.gridPaneCardsPlayer.getChildren().clear();\r\n        Card[] currentVisibleCardsHumanPlayer = this.gameUno.getCurrentVisibleCardsHumanPlayer(this.posInitCardToShow);\r\n\r\n        for (int i = 0; i < currentVisibleCardsHumanPlayer.length; i++) {\r\n            Card card = currentVisibleCardsHumanPlayer[i];\r\n            ImageView cardImageView = card.getCard();\r\n\r\n            cardImageView.setOnMouseClicked((MouseEvent event) -> {\r\n                if (isCardPosible(card, table)){\r\n                    gameUno.playCard(card);\r\n                    tableImageView.setImage(card.getImage());\r\n                    humanPlayer.removeCard(findPosCardsHumanPlayer(card));\r\n                    printCardsHumanPlayer();\r\n\r\n                    applyPower(machinePlayer, card);\r\n                }\r\n            });\r\n            this.gridPaneCardsPlayer.add(cardImageView, i, 0);\r\n        }\r\n        humanPlayerCardsLabel.setText(\"Tus cartas: \" + humanPlayer.getCardsPlayer().size());\r\n    }\r\n\r\n    public void printCardsMachinePlayer(){\r\n        Card[] currentVisibleCardsMachinePlayer = this.gameUno.getCurrentVisibleCardsMachinePLayer();\r\n            gridPaneCardsMachine.getChildren().clear();\r\n            for (int i = 0; i < currentVisibleCardsMachinePlayer.length; i++){\r\n                Card card = currentVisibleCardsMachinePlayer[i];\r\n                ImageView cardImageView = card.getCard();\r\n\r\n                gridPaneCardsMachine.add(cardImageView, i , 0);\r\n\r\n                machineCardsLabel.setText(\"Cartas de la máquina: \" + machinePlayer.getCardsPlayer().size());\r\n            }\r\n    }\r\n\r\n    public boolean isCardPosible(Card card, Table table){\r\n        return Objects.equals(table.getCurrentColor(), card.getColor())\r\n                || Objects.equals(table.getCurrentNum(), card.getValue())\r\n                || Objects.equals(card.getValue(), \"WILD\")\r\n                || Objects.equals(card.getValue(), \"FOUR\");\r\n    }\r\n\r\n    public void applyPower(Player targetPlayer, Card card){\r\n        switch (card.getValue()) {\r\n            case \"FOUR\":\r\n                gameUno.eatCard(targetPlayer, 4);\r\n                pieAnchorPane.setVisible(true);\r\n                freezePlayMachineThread();\r\n                break;\r\n            case \"TWO\":\r\n                gameUno.eatCard(targetPlayer, 2);\r\n                // Crear un thread para cuando se lanzan cartas de comer\r\n                break;\r\n            case \"SKIP\":\r\n                if (targetPlayer == humanPlayer){\r\n                    threadPlayMachine.setHasPLayerPlayed(true);\r\n                }\r\n                break;\r\n            case \"WILD\":\r\n                pieAnchorPane.setVisible(true);\r\n                freezePlayMachineThread();\r\n                break;\r\n            case \"REVERSE\":\r\n                break;\r\n            default:\r\n                threadPlayMachine.setHasPLayerPlayed(true);\r\n                System.out.println(\"La carta no tiene ninguna característica\");\r\n        }\r\n    }\r\n\r\n    /**\r\n     * Finds the position of a specific card in the human player's hand.\r\n     *\r\n     * @param card the card to find\r\n     * @return the position of the card, or -1 if not found\r\n     */\r\n    private Integer findPosCardsHumanPlayer(Card card) {\r\n        for (int i = 0; i < this.humanPlayer.getCardsPlayer().size(); i++) {\r\n            if (this.humanPlayer.getCardsPlayer().get(i).equals(card)) {\r\n                return i;\r\n            }\r\n        }\r\n        return -1;\r\n    }\r\n\r\n    public void setDisableHumanPlayerCards(boolean value){\r\n        gridPaneCardsPlayer.setDisable(value);\r\n    }\r\n\r\n    public void handleColorSelection(ActionEvent event){\r\n        Arc arc = (Arc) event.getSource();\r\n        Paint color = arc.getFill();\r\n        if (color == Color.RED){\r\n            table.setCurrentColor(\"RED\");\r\n        } else if(color == Color.BLUE){\r\n            table.setCurrentColor(\"BLUE\");\r\n        } else if(color == Color.GREEN){\r\n            table.setCurrentColor(\"GREEN\");\r\n        } else if(color == Color.YELLOW){\r\n            table.setCurrentColor(\"YELLOW\");\r\n        }\r\n        pieAnchorPane.setVisible(false);\r\n        notifyPlayMachineThread();\r\n    }\r\n\r\n    private void freezePlayMachineThread(){\r\n        synchronized (threadPlayMachine){\r\n            try{\r\n                threadPlayMachine.wait();\r\n            } catch (InterruptedException e){\r\n                e.printStackTrace();\r\n            }\r\n        }\r\n    }\r\n\r\n    private void notifyPlayMachineThread(){\r\n        synchronized (threadPlayMachine){\r\n            threadPlayMachine.notify();\r\n        }\r\n    }\r\n\r\n    /**\r\n     * Handles the \"Back\" button action to show the previous set of cards.\r\n     *\r\n     * @param event the action event\r\n     */\r\n    @FXML\r\n    void onHandleBack(ActionEvent event) {\r\n        if (this.posInitCardToShow > 0) {\r\n            this.posInitCardToShow--;\r\n            printCardsHumanPlayer();\r\n        }\r\n    }\r\n\r\n    /**\r\n     * Handles the \"Next\" button action to show the next set of cards.\r\n     *\r\n     * @param event the action event\r\n     */\r\n    @FXML\r\n    void onHandleNext(ActionEvent event) {\r\n        if (this.posInitCardToShow < this.humanPlayer.getCardsPlayer().size() - 4) {\r\n            this.posInitCardToShow++;\r\n            printCardsHumanPlayer();\r\n        }\r\n    }\r\n\r\n    @FXML\r\n    void onHandleTakeCard() {\r\n        gameUno.eatCard(humanPlayer, 1);\r\n        printCardsHumanPlayer();\r\n    }\r\n\r\n    /**\r\n     * Handles the action of saying \"Uno\".\r\n     *\r\n     * @param event the action event\r\n     */\r\n    @FXML\r\n    void onHandleUno(ActionEvent event) {\r\n        // Implement logic to handle Uno event here\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/org/example/eiscuno/controller/GameUnoController.java b/src/main/java/org/example/eiscuno/controller/GameUnoController.java
+--- a/src/main/java/org/example/eiscuno/controller/GameUnoController.java	(revision 599118e6135d33bd119e81930b74a6e5dd077756)
++++ b/src/main/java/org/example/eiscuno/controller/GameUnoController.java	(date 1733751325412)
+@@ -10,12 +10,15 @@
+ import javafx.scene.paint.Color;
+ import javafx.scene.paint.Paint;
+ import javafx.scene.shape.Arc;
++import javafx.util.Duration;
+ import org.example.eiscuno.model.card.Card;
+ import org.example.eiscuno.model.deck.Deck;
+ import org.example.eiscuno.model.game.GameUno;
+ import org.example.eiscuno.model.machine.ThreadPlayMachine;
+ import org.example.eiscuno.model.player.Player;
+ import org.example.eiscuno.model.table.Table;
++import javafx.animation.FadeTransition;
++import javafx.animation.TranslateTransition;
+ 
+ import javax.sound.sampled.FloatControl;
+ import java.util.Objects;
+@@ -59,10 +62,12 @@
+         initVariables();
+         printCardsHumanPlayer();
+         printCardsMachinePlayer();
++        startGameWithAnimation(); // Llamar a la función que inicia el juego con animaciones
+         Card firstCard = deck.takeCard();
+         table.addCardOnTheTable(firstCard);
+         tableImageView.setImage(firstCard.getImage());
+         threadPlayMachine.start();
++
+     }
+ 
+     /**
+@@ -78,6 +83,53 @@
+         this.threadPlayMachine = new ThreadPlayMachine(gameUno, tableImageView);
+     }
+ 
++    public void discardCard(Card card) {
++        animateCardDiscard(card); // Llamar a la animación
++    }
++
++    private void animateCardDiscard(Card card) {
++        ImageView cardImageView = card.getCard();
++        cardImageView.setOpacity(1);
++        tableImageView.setImage(card.getImage());
++
++        // Animación de movimiento
++        TranslateTransition translate = new TranslateTransition(Duration.seconds(0.5), cardImageView);
++        translate.setFromX(tableImageView.getLayoutX());
++        translate.setFromY(tableImageView.getLayoutY());
++        translate.setToX(tableImageView.getLayoutX() + 50); // Ajustar la posición de descarte
++        translate.setToY(tableImageView.getLayoutY() + 50);
++        translate.play();
++    }
++
++
++
++    private void startGameWithAnimation() {
++        for (int i = 0; i < 10; i++) {
++            if (i < 5) {
++                Card card = deck.takeCard();
++                humanPlayer.addCard(card);
++                animateCardDeal(card, gridPaneCardsPlayer, i); // Animación para el jugador humano
++            } else {
++                Card card = deck.takeCard();
++                machinePlayer.addCard(card);
++                animateCardDeal(card, gridPaneCardsMachine, i - 5); // Animación para la máquina
++            }
++        }
++    }
++
++    private void animateCardDeal(Card card, GridPane gridPane, int position) {
++        ImageView cardImageView = card.getCard();
++        cardImageView.setOpacity(0); // Comenzar invisible
++        gridPane.add(cardImageView, position, 0);
++
++        // Animación
++        FadeTransition fadeIn = new FadeTransition(Duration.seconds(0.5), cardImageView);
++        fadeIn.setFromValue(0);
++        fadeIn.setToValue(1);
++        fadeIn.setDelay(Duration.seconds(position * 0.2)); // Retraso para cada carta
++        fadeIn.play();
++    }
++
+     /**
+      * Prints the human player's cards on the grid pane.
+      */
+Index: .idea/workspace.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"AutoImportSettings\">\r\n    <option name=\"autoReloadType\" value=\"SELECTIVE\" />\r\n  </component>\r\n  <component name=\"ChangeListManager\">\r\n    <list default=\"true\" id=\"1ee8ff40-bbdd-4aec-a3d2-cf5cc45130ec\" name=\"Changes\" comment=\"\">\r\n      <change beforePath=\"$PROJECT_DIR$/.idea/misc.xml\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/.idea/misc.xml\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/.idea/workspace.xml\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/.idea/workspace.xml\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/org/example/eiscuno/controller/GameUnoController.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/org/example/eiscuno/controller/GameUnoController.java\" afterDir=\"false\" />\r\n    </list>\r\n    <option name=\"SHOW_DIALOG\" value=\"false\" />\r\n    <option name=\"HIGHLIGHT_CONFLICTS\" value=\"true\" />\r\n    <option name=\"HIGHLIGHT_NON_ACTIVE_CHANGELIST\" value=\"false\" />\r\n    <option name=\"LAST_RESOLUTION\" value=\"IGNORE\" />\r\n  </component>\r\n  <component name=\"FileTemplateManagerImpl\">\r\n    <option name=\"RECENT_TEMPLATES\">\r\n      <list>\r\n        <option value=\"JavaFXApplication\" />\r\n        <option value=\"Enum\" />\r\n        <option value=\"CSS File\" />\r\n        <option value=\"Interface\" />\r\n        <option value=\"Class\" />\r\n      </list>\r\n    </option>\r\n  </component>\r\n  <component name=\"Git.Settings\">\r\n    <excluded-from-favorite>\r\n      <branch-storage>\r\n        <map>\r\n          <entry type=\"REMOTE\">\r\n            <value>\r\n              <list>\r\n                <branch-info repo=\"$PROJECT_DIR$\" source=\"origin/master\" />\r\n              </list>\r\n            </value>\r\n          </entry>\r\n        </map>\r\n      </branch-storage>\r\n    </excluded-from-favorite>\r\n    <option name=\"RECENT_GIT_ROOT_PATH\" value=\"$PROJECT_DIR$\" />\r\n  </component>\r\n  <component name=\"GitHubPullRequestSearchHistory\">{\r\n  &quot;lastFilter&quot;: {\r\n    &quot;state&quot;: &quot;OPEN&quot;,\r\n    &quot;assignee&quot;: &quot;fabiansvc&quot;\r\n  }\r\n}</component>\r\n  <component name=\"GithubPullRequestsUISettings\">{\r\n  &quot;selectedUrlAndAccountId&quot;: {\r\n    &quot;url&quot;: &quot;https://github.com/fabiansvc/eisc-uno.git&quot;,\r\n    &quot;accountId&quot;: &quot;0c82e6b4-a45c-4190-a110-02ef4a3ff1b6&quot;\r\n  }\r\n}</component>\r\n  <component name=\"MavenImportPreferences\">\r\n    <option name=\"generalSettings\">\r\n      <MavenGeneralSettings>\r\n        <option name=\"mavenHomeTypeForPersistence\" value=\"WRAPPER\" />\r\n      </MavenGeneralSettings>\r\n    </option>\r\n  </component>\r\n  <component name=\"ProjectColorInfo\">{\r\n  &quot;associatedIndex&quot;: 4\r\n}</component>\r\n  <component name=\"ProjectId\" id=\"2h51MgXC3VsYGUopaGajj22IER5\" />\r\n  <component name=\"ProjectLevelVcsManager\" settingsEditedManually=\"true\" />\r\n  <component name=\"ProjectViewState\">\r\n    <option name=\"hideEmptyMiddlePackages\" value=\"true\" />\r\n    <option name=\"showLibraryContents\" value=\"true\" />\r\n  </component>\r\n  <component name=\"PropertiesComponent\">{\r\n  &quot;keyToString&quot;: {\r\n    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,\r\n    &quot;Application.HelloApplication.executor&quot;: &quot;Run&quot;,\r\n    &quot;Application.Main.executor&quot;: &quot;Run&quot;,\r\n    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,\r\n    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,\r\n    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,\r\n    &quot;git-widget-placeholder&quot;: &quot;jssc&quot;,\r\n    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,\r\n    &quot;last_opened_file_path&quot;: &quot;C:/Users/sebas/OneDrive/Desktop/Proyectos-POE/MiniProyecto3&quot;,\r\n    &quot;list.type.of.created.stylesheet&quot;: &quot;CSS&quot;,\r\n    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,\r\n    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,\r\n    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,\r\n    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,\r\n    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,\r\n    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;,\r\n    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;\r\n  }\r\n}</component>\r\n  <component name=\"RecentsManager\">\r\n    <key name=\"CopyFile.RECENT_KEYS\">\r\n      <recent name=\"C:\\Users\\User\\OneDrive\\Escritorio\\Universidad\\Semestre 3\\Proyectos-POE\\Mini Proyecto 4\\src\\main\\java\\org\\example\\eiscuno\\model\" />\r\n    </key>\r\n    <key name=\"MoveFile.RECENT_KEYS\">\r\n      <recent name=\"C:\\Users\\sebas\\OneDrive\\Desktop\\Proyectos-POE\\MiniProject4\\src\\main\\resources\\org\\example\\eiscuno\\images\" />\r\n      <recent name=\"C:\\Users\\User\\OneDrive\\Escritorio\\Universidad\\Semestre 3\\Proyectos-POE\\Mini Proyecto 4\\src\\main\\resources\\org\\example\\eiscuno\\fxml\" />\r\n      <recent name=\"C:\\Users\\User\\OneDrive\\Escritorio\\Universidad\\Semestre 3\\Proyectos-POE\\Mini Proyecto 4\\src\\main\\resources\\org\\example\\eiscuno\" />\r\n      <recent name=\"C:\\Users\\fsvc1\\Coding\\eisc-uno\\src\\main\\resources\\org\\example\\eiscuno\" />\r\n      <recent name=\"C:\\Users\\fsvc1\\Coding\\eisc-uno\\src\\main\\resources\\org\\example\\eiscuno\\images\" />\r\n    </key>\r\n  </component>\r\n  <component name=\"RunManager\">\r\n    <configuration name=\"Main\" type=\"Application\" factoryName=\"Application\" temporary=\"true\" nameIsGenerated=\"true\">\r\n      <option name=\"MAIN_CLASS_NAME\" value=\"org.example.eiscuno.Main\" />\r\n      <module name=\"eisc-uno\" />\r\n      <extension name=\"coverage\">\r\n        <pattern>\r\n          <option name=\"PATTERN\" value=\"org.example.eiscuno.*\" />\r\n          <option name=\"ENABLED\" value=\"true\" />\r\n        </pattern>\r\n      </extension>\r\n      <method v=\"2\">\r\n        <option name=\"Make\" enabled=\"true\" />\r\n      </method>\r\n    </configuration>\r\n    <recent_temporary>\r\n      <list>\r\n        <item itemvalue=\"Application.Main\" />\r\n      </list>\r\n    </recent_temporary>\r\n  </component>\r\n  <component name=\"SpellCheckerSettings\" RuntimeDictionaries=\"0\" Folders=\"0\" CustomDictionaries=\"0\" DefaultDictionary=\"application-level\" UseSingleDictionary=\"true\" transferred=\"true\" />\r\n  <component name=\"TaskManager\">\r\n    <task active=\"true\" id=\"Default\" summary=\"Default task\">\r\n      <changelist id=\"1ee8ff40-bbdd-4aec-a3d2-cf5cc45130ec\" name=\"Changes\" comment=\"\" />\r\n      <created>1716869079895</created>\r\n      <option name=\"number\" value=\"Default\" />\r\n      <option name=\"presentableId\" value=\"Default\" />\r\n      <updated>1716869079895</updated>\r\n      <workItem from=\"1716869081101\" duration=\"1989000\" />\r\n      <workItem from=\"1716937216117\" duration=\"1202000\" />\r\n      <workItem from=\"1716949345992\" duration=\"5490000\" />\r\n      <workItem from=\"1717004194707\" duration=\"3656000\" />\r\n      <workItem from=\"1717077374234\" duration=\"23000\" />\r\n      <workItem from=\"1717100685009\" duration=\"1547000\" />\r\n      <workItem from=\"1717179969295\" duration=\"1262000\" />\r\n      <workItem from=\"1717188401940\" duration=\"5723000\" />\r\n      <workItem from=\"1717248020885\" duration=\"2071000\" />\r\n      <workItem from=\"1717294616252\" duration=\"3767000\" />\r\n      <workItem from=\"1717380082805\" duration=\"84000\" />\r\n      <workItem from=\"1717445468019\" duration=\"129000\" />\r\n      <workItem from=\"1717445697650\" duration=\"964000\" />\r\n      <workItem from=\"1717456780718\" duration=\"9929000\" />\r\n      <workItem from=\"1717624873426\" duration=\"617000\" />\r\n      <workItem from=\"1717648324316\" duration=\"1349000\" />\r\n      <workItem from=\"1717701834429\" duration=\"18000\" />\r\n      <workItem from=\"1717704199858\" duration=\"6785000\" />\r\n      <workItem from=\"1717852871006\" duration=\"31000\" />\r\n      <workItem from=\"1717853787588\" duration=\"7091000\" />\r\n      <workItem from=\"1732204398035\" duration=\"285000\" />\r\n    </task>\r\n    <servers />\r\n  </component>\r\n  <component name=\"TypeScriptGeneratedFilesManager\">\r\n    <option name=\"version\" value=\"3\" />\r\n  </component>\r\n  <component name=\"XDebuggerManager\">\r\n    <watches-manager>\r\n      <configuration name=\"Application\">\r\n        <watch expression=\"((ThreadPlayMachine)this).currentVisibleCardsMachine\" custom=\"org.example.eiscuno.model.machine.ThreadPlayMachine\" />\r\n      </configuration>\r\n    </watches-manager>\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/workspace.xml b/.idea/workspace.xml
+--- a/.idea/workspace.xml	(revision 599118e6135d33bd119e81930b74a6e5dd077756)
++++ b/.idea/workspace.xml	(date 1733751375489)
+@@ -5,8 +5,6 @@
+   </component>
+   <component name="ChangeListManager">
+     <list default="true" id="1ee8ff40-bbdd-4aec-a3d2-cf5cc45130ec" name="Changes" comment="">
+-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/src/main/java/org/example/eiscuno/controller/GameUnoController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/eiscuno/controller/GameUnoController.java" afterDir="false" />
+     </list>
+     <option name="SHOW_DIALOG" value="false" />
+Index: .idea/misc.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"ExternalStorageConfigurationManager\" enabled=\"true\" />\r\n  <component name=\"MavenProjectsManager\">\r\n    <option name=\"originalFiles\">\r\n      <list>\r\n        <option value=\"$PROJECT_DIR$/pom.xml\" />\r\n      </list>\r\n    </option>\r\n  </component>\r\n  <component name=\"ProjectRootManager\" version=\"2\" languageLevel=\"JDK_22\" default=\"true\" project-jdk-name=\"corretto-17\" project-jdk-type=\"JavaSDK\">\r\n    <output url=\"file://$PROJECT_DIR$/out\" />\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/misc.xml b/.idea/misc.xml
+--- a/.idea/misc.xml	(revision 599118e6135d33bd119e81930b74a6e5dd077756)
++++ b/.idea/misc.xml	(date 1733751375492)
+@@ -8,7 +8,7 @@
+       </list>
+     </option>
+   </component>
+-  <component name="ProjectRootManager" version="2" languageLevel="JDK_22" default="true" project-jdk-name="corretto-17" project-jdk-type="JavaSDK">
++  <component name="ProjectRootManager" version="2" languageLevel="JDK_17" default="true" project-jdk-name="corretto-17" project-jdk-type="JavaSDK">
+     <output url="file://$PROJECT_DIR$/out" />
+   </component>
+ </project>
+\ No newline at end of file

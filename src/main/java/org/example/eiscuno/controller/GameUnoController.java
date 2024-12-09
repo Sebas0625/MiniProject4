@@ -10,12 +10,15 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Arc;
+import javafx.util.Duration;
 import org.example.eiscuno.model.card.Card;
 import org.example.eiscuno.model.deck.Deck;
 import org.example.eiscuno.model.game.GameUno;
 import org.example.eiscuno.model.machine.ThreadPlayMachine;
 import org.example.eiscuno.model.player.Player;
 import org.example.eiscuno.model.table.Table;
+import javafx.animation.FadeTransition;
+import javafx.animation.TranslateTransition;
 
 import javax.sound.sampled.FloatControl;
 import java.util.Objects;
@@ -59,10 +62,12 @@ public class GameUnoController {
         initVariables();
         printCardsHumanPlayer();
         printCardsMachinePlayer();
+        startGameWithAnimation(); // Llamar a la función que inicia el juego con animaciones
         Card firstCard = deck.takeCard();
         table.addCardOnTheTable(firstCard);
         tableImageView.setImage(firstCard.getImage());
         threadPlayMachine.start();
+
     }
 
     /**
@@ -76,6 +81,53 @@ public class GameUnoController {
         this.gameUno = new GameUno(this.humanPlayer, this.machinePlayer, this.deck, this.table);
         this.posInitCardToShow = 0;
         this.threadPlayMachine = new ThreadPlayMachine(gameUno, tableImageView);
+    }
+
+    public void discardCard(Card card) {
+        animateCardDiscard(card); // Llamar a la animación
+    }
+
+    private void animateCardDiscard(Card card) {
+        ImageView cardImageView = card.getCard();
+        cardImageView.setOpacity(1);
+        tableImageView.setImage(card.getImage());
+
+        // Animación de movimiento
+        TranslateTransition translate = new TranslateTransition(Duration.seconds(0.5), cardImageView);
+        translate.setFromX(tableImageView.getLayoutX());
+        translate.setFromY(tableImageView.getLayoutY());
+        translate.setToX(tableImageView.getLayoutX() + 50); // Ajustar la posición de descarte
+        translate.setToY(tableImageView.getLayoutY() + 50);
+        translate.play();
+    }
+
+
+
+    private void startGameWithAnimation() {
+        for (int i = 0; i < 10; i++) {
+            if (i < 5) {
+                Card card = deck.takeCard();
+                humanPlayer.addCard(card);
+                animateCardDeal(card, gridPaneCardsPlayer, i); // Animación para el jugador humano
+            } else {
+                Card card = deck.takeCard();
+                machinePlayer.addCard(card);
+                animateCardDeal(card, gridPaneCardsMachine, i - 5); // Animación para la máquina
+            }
+        }
+    }
+
+    private void animateCardDeal(Card card, GridPane gridPane, int position) {
+        ImageView cardImageView = card.getCard();
+        cardImageView.setOpacity(0); // Comenzar invisible
+        gridPane.add(cardImageView, position, 0);
+
+        // Animación
+        FadeTransition fadeIn = new FadeTransition(Duration.seconds(0.5), cardImageView);
+        fadeIn.setFromValue(0);
+        fadeIn.setToValue(1);
+        fadeIn.setDelay(Duration.seconds(position * 0.2)); // Retraso para cada carta
+        fadeIn.play();
     }
 
     /**
