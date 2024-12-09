@@ -61,14 +61,7 @@ public class GameUnoController {
     @FXML
     public void initialize() {
         initVariables();
-//        printCardsHumanPlayer();
-//        printCardsMachinePlayer();
-        startGameWithAnimation(); // Llamar a la función que inicia el juego con animaciones
-//        Card firstCard = deck.takeCard();
-//        table.addCardOnTheTable(firstCard);
-//        tableImageView.setImage(firstCard.getImage());
-//        threadPlayMachine.start();
-
+        startGameWithAnimation();
     }
 
     /**
@@ -84,71 +77,33 @@ public class GameUnoController {
         this.threadPlayMachine = new ThreadPlayMachine(gameUno, tableImageView);
     }
 
-    public void discardCard(Card card) {
-        animateCardDiscard(card); // Llamar a la animación
-    }
-
-    private void animateCardDiscard(Card card) {
-        ImageView cardImageView = card.getCard();
-        cardImageView.setOpacity(1);
-        tableImageView.setImage(card.getImage());
-
-        // Animación de movimiento
-        TranslateTransition translate = new TranslateTransition(Duration.seconds(0.5), cardImageView);
-        translate.setFromX(tableImageView.getLayoutX());
-        translate.setFromY(tableImageView.getLayoutY());
-        translate.setToX(tableImageView.getLayoutX() + 50); // Ajustar la posición de descarte
-        translate.setToY(tableImageView.getLayoutY() + 50);
-        translate.play();
-    }
-
-
 
     private void startGameWithAnimation() {
-        // Llamar al metodo de reparto de cartas en GameUno
         gameUno.startGame();
 
-        // Animar las cartas que se han repartido
         for (int i = 0; i < 5; i++) {
             Card humanCard = humanPlayer.getCard(i);
-            animateCardDeal(humanCard, gridPaneCardsPlayer, i); // Animación para el jugador humano
+            animateCardDeal(humanCard, gridPaneCardsPlayer, i);
         }
         for (int i = 0; i < 5; i++) {
             Card machineCard = machinePlayer.getCard(i);
-            animateCardDeal(machineCard, gridPaneCardsMachine, i); // Animación para la máquina
+            animateCardDeal(machineCard, gridPaneCardsMachine, i);
         }
 
-        // PauseTransition para esperar un tiempo después de la animación
         PauseTransition pause = new PauseTransition(Duration.seconds(2)); // Esperar 2 segundos
         pause.setOnFinished(event -> {
-            // Acciones a realizar después de la pausa
 
-            // Mostrar las cartas en la interfaz después de la animación
             printCardsHumanPlayer();
             printCardsMachinePlayer();
 
-            // Toma la primera carta del mazo y la coloca en la mesa
-            Card firstCard = gameUno.getDeck().takeCard(); // Asegúrate de que el método getDeck() esté disponible
-            table.addCardOnTheTable(firstCard); // Añade la carta a la mesa
-            tableImageView.setImage(firstCard.getImage()); // Muestra la carta en la interfaz
-            threadPlayMachine.start(); // Inicia el hilo de la máquina
+            Card firstCard = gameUno.getDeck().takeCard();
+            table.addCardOnTheTable(firstCard);
+            tableImageView.setImage(firstCard.getImage());
+            threadPlayMachine.start();
             System.out.println("Pausa finalizada, procediendo con el juego.");
         });
         pause.play();
         System.out.println("Pausa iniciada, procediendo con el juego.");
-    }
-
-    private void animateCardDeal(Card card, GridPane gridPane, int position) {
-        ImageView cardImageView = card.getCard();
-        cardImageView.setOpacity(0); // Comenzar invisible
-        gridPane.add(cardImageView, position, 0);
-
-        // Animación
-        FadeTransition fadeIn = new FadeTransition(Duration.seconds(0.5), cardImageView);
-        fadeIn.setFromValue(0);
-        fadeIn.setToValue(1);
-        fadeIn.setDelay(Duration.seconds(position * 0.2)); // Retraso para cada carta
-        fadeIn.play();
     }
 
     /**
@@ -316,5 +271,34 @@ public class GameUnoController {
     @FXML
     void onHandleUno(ActionEvent event) {
         // Implement logic to handle Uno event here
+    }
+
+    public void discardCard(Card card) {
+        animateCardDiscard(card);
+    }
+
+    private void animateCardDiscard(Card card) {
+        ImageView cardImageView = card.getCard();
+        cardImageView.setOpacity(1);
+        tableImageView.setImage(card.getImage());
+
+        TranslateTransition translate = new TranslateTransition(Duration.seconds(0.5), cardImageView);
+        translate.setFromX(tableImageView.getLayoutX());
+        translate.setFromY(tableImageView.getLayoutY());
+        translate.setToX(tableImageView.getLayoutX() + 50);
+        translate.setToY(tableImageView.getLayoutY() + 50);
+        translate.play();
+    }
+
+    private void animateCardDeal(Card card, GridPane gridPane, int position) {
+        ImageView cardImageView = card.getCard();
+        cardImageView.setOpacity(0);
+        gridPane.add(cardImageView, position, 0);
+
+        FadeTransition fadeIn = new FadeTransition(Duration.seconds(0.5), cardImageView);
+        fadeIn.setFromValue(0);
+        fadeIn.setToValue(1);
+        fadeIn.setDelay(Duration.seconds(position * 0.2)); // Retraso para cada carta
+        fadeIn.play();
     }
 }
