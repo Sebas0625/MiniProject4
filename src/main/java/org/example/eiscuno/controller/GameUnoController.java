@@ -1,5 +1,6 @@
 package org.example.eiscuno.controller;
 
+import javafx.animation.PauseTransition;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
@@ -60,13 +61,13 @@ public class GameUnoController {
     @FXML
     public void initialize() {
         initVariables();
-        printCardsHumanPlayer();
-        printCardsMachinePlayer();
+//        printCardsHumanPlayer();
+//        printCardsMachinePlayer();
         startGameWithAnimation(); // Llamar a la función que inicia el juego con animaciones
-        Card firstCard = deck.takeCard();
-        table.addCardOnTheTable(firstCard);
-        tableImageView.setImage(firstCard.getImage());
-        threadPlayMachine.start();
+//        Card firstCard = deck.takeCard();
+//        table.addCardOnTheTable(firstCard);
+//        tableImageView.setImage(firstCard.getImage());
+//        threadPlayMachine.start();
 
     }
 
@@ -115,6 +116,23 @@ public class GameUnoController {
                 animateCardDeal(card, gridPaneCardsMachine, i - 5); // Animación para la máquina
             }
         }
+        // PauseTransition para esperar un tiempo después de la animación
+        PauseTransition pause = new PauseTransition(Duration.seconds(2)); // Esperar 2 segundos
+        pause.setOnFinished(event -> {
+            // Acciones a realizar después de la pausa
+
+            // Mostrar las cartas en la interfaz después de la animación
+            printCardsHumanPlayer();
+            printCardsMachinePlayer();
+
+            Card firstCard = deck.takeCard(); // Toma la primera carta
+            table.addCardOnTheTable(firstCard); // Añade la carta a la mesa
+            tableImageView.setImage(firstCard.getImage()); // Muestra la carta en la interfaz
+            threadPlayMachine.start();// Inicia el hilo de la máquina
+            System.out.println("Pausa finalizada, procediendo con el juego.");
+        });
+        pause.play();
+        System.out.println("Pausa iniciada, procediendo con el juego.");
     }
 
     private void animateCardDeal(Card card, GridPane gridPane, int position) {
