@@ -16,7 +16,7 @@ import java.io.IOException;
 public class ThreadPlayMachine extends Thread{
     private final GameUno gameUno;
     private final ImageView tableImageView;
-    private volatile boolean hasPLayerPlayed = false;
+    private volatile int currentTurn;
 
     public ThreadPlayMachine(GameUno gameUno, ImageView tableImageView) {
         this.gameUno = gameUno;
@@ -25,20 +25,20 @@ public class ThreadPlayMachine extends Thread{
 
     public void run(){
         while (true){
-            if (hasPLayerPlayed){
-                try {
-                    GameUnoStage.getInstance().getGameUnoController().setDisableHumanPlayerCards(true);
+            try {
+                GameUnoController gameUnoController = GameUnoStage.getInstance().getGameUnoController();
+                this.currentTurn = gameUnoController.getCurrentTurn();
+                if (currentTurn == 1){
                     Thread.sleep((long) (/*Math.random() */ 3000));
                     putCardOnTheTable();
-                    setHasPLayerPlayed(false);
-                } catch (IOException | InterruptedException e){
-                    e.printStackTrace();
                 }
+            } catch (InterruptedException | IOException e){
+                e.printStackTrace();
             }
         }
     }
 
-    public void putCardOnTheTable() throws IOException{
+    public void putCardOnTheTable() throws IOException {
         GameUnoController gameUnoController = GameUnoStage.getInstance().getGameUnoController();
 
         Player machinePlayer = this.gameUno.getMachinePlayer();
@@ -82,11 +82,8 @@ public class ThreadPlayMachine extends Thread{
         tableImageView.setImage(card.getImage());
         machinePlayer.removeCard(index);
 
-        gameUnoController.setDisableHumanPlayerCards(false);
+        gameUnoController.nextTurn();
         Platform.runLater(gameUnoController::printCardsMachinePlayer);
     }
 
-    public void setHasPLayerPlayed(boolean hasPLayerPlayed) {
-        this.hasPLayerPlayed = hasPLayerPlayed;
-    }
 }

@@ -1,9 +1,12 @@
 package org.example.eiscuno.controller;
 
 import javafx.animation.PauseTransition;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
+import javafx.scene.control.Button;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
@@ -15,13 +18,12 @@ import javafx.util.Duration;
 import org.example.eiscuno.model.card.Card;
 import org.example.eiscuno.model.deck.Deck;
 import org.example.eiscuno.model.game.GameUno;
+import org.example.eiscuno.model.machine.ThreadSingUNOMachine;
 import org.example.eiscuno.model.machine.ThreadPlayMachine;
 import org.example.eiscuno.model.player.Player;
 import org.example.eiscuno.model.table.Table;
 import javafx.animation.FadeTransition;
 import javafx.animation.TranslateTransition;
-
-import javax.sound.sampled.FloatControl;
 import java.util.Objects;
 
 /**
@@ -45,7 +47,13 @@ public class GameUnoController {
     private Label humanPlayerCardsLabel;
 
     @FXML
-    private AnchorPane pieAnchorPane;
+    private Button buttonUNO;
+
+    @FXML
+    private ImageView adviseUnoPlayer;
+
+    @FXML
+    private ImageView adviseUnoMachine;
 
     private Player humanPlayer;
     private Player machinePlayer;
@@ -54,6 +62,8 @@ public class GameUnoController {
     private GameUno gameUno;
     private int posInitCardToShow;
     private ThreadPlayMachine threadPlayMachine;
+    private ThreadSingUNOMachine threadSingUNOMachine;
+    private int currentTurn = 0;
 
     /**
      * Initializes the controller.
@@ -75,6 +85,11 @@ public class GameUnoController {
         this.gameUno = new GameUno(this.humanPlayer, this.machinePlayer, this.deck, this.table);
         this.posInitCardToShow = 0;
         this.threadPlayMachine = new ThreadPlayMachine(gameUno, tableImageView);
+        this.buttonUNO.setDisable(true);
+        this.threadSingUNOMachine = new ThreadSingUNOMachine(this.gameUno, this);
+        Thread t = new Thread(threadSingUNOMachine, "ThreadSingUNO");
+        t.setDaemon(true);
+        t.start();
     }
 
 
@@ -92,7 +107,6 @@ public class GameUnoController {
 
         PauseTransition pause = new PauseTransition(Duration.seconds(2)); // Esperar 2 segundos
         pause.setOnFinished(event -> {
-
             printCardsHumanPlayer();
             printCardsMachinePlayer();
 
@@ -118,13 +132,17 @@ public class GameUnoController {
             ImageView cardImageView = card.getCard();
 
             cardImageView.setOnMouseClicked((MouseEvent event) -> {
-                if (isCardPosible(card, table)){
+                if (isCardPosible(card, table) && currentTurn == 0){
                     gameUno.playCard(card);
                     tableImageView.setImage(card.getImage());
                     humanPlayer.removeCard(findPosCardsHumanPlayer(card));
                     printCardsHumanPlayer();
 
-                    applyPower(machinePlayer, card);
+                    handleCardAction(machinePlayer, card);
+
+                    checkNumberCards(humanPlayer.getCardsPlayer().size(), humanPlayer.getTypePlayer());
+
+                    checkNumberCards(machinePlayer.getCardsPlayer().size(), machinePlayer.getTypePlayer());
                 }
             });
             this.gridPaneCardsPlayer.add(cardImageView, i, 0);
@@ -152,30 +170,25 @@ public class GameUnoController {
                 || Objects.equals(card.getValue(), "FOUR");
     }
 
-    public void applyPower(Player targetPlayer, Card card){
+    public void handleCardAction(Player targetPlayer, Card card){
         switch (card.getValue()) {
             case "FOUR":
                 gameUno.eatCard(targetPlayer, 4);
-                pieAnchorPane.setVisible(true);
-                freezePlayMachineThread();
+
                 break;
             case "TWO":
                 gameUno.eatCard(targetPlayer, 2);
-                // Crear un thread para cuando se lanzan cartas de comer
-                break;
-            case "SKIP":
-                if (targetPlayer == humanPlayer){
-                    threadPlayMachine.setHasPLayerPlayed(true);
-                }
+                nextTurn();
                 break;
             case "WILD":
-                pieAnchorPane.setVisible(true);
-                freezePlayMachineThread();
+
+                break;
+            case "SKIP":
                 break;
             case "REVERSE":
                 break;
             default:
-                threadPlayMachine.setHasPLayerPlayed(true);
+                nextTurn();
                 System.out.println("La carta no tiene ninguna característica");
         }
     }
@@ -195,10 +208,6 @@ public class GameUnoController {
         return -1;
     }
 
-    public void setDisableHumanPlayerCards(boolean value){
-        gridPaneCardsPlayer.setDisable(value);
-    }
-
     public void handleColorSelection(ActionEvent event){
         Arc arc = (Arc) event.getSource();
         Paint color = arc.getFill();
@@ -211,24 +220,14 @@ public class GameUnoController {
         } else if(color == Color.YELLOW){
             table.setCurrentColor("YELLOW");
         }
-        pieAnchorPane.setVisible(false);
-        notifyPlayMachineThread();
     }
 
-    private void freezePlayMachineThread(){
-        synchronized (threadPlayMachine){
-            try{
-                threadPlayMachine.wait();
-            } catch (InterruptedException e){
-                e.printStackTrace();
-            }
-        }
+    public void nextTurn(){
+        this.currentTurn = this.currentTurn == 0 ? 1 : 0;
     }
 
-    private void notifyPlayMachineThread(){
-        synchronized (threadPlayMachine){
-            threadPlayMachine.notify();
-        }
+    public int getCurrentTurn(){
+        return this.currentTurn;
     }
 
     /**
@@ -270,7 +269,42 @@ public class GameUnoController {
      */
     @FXML
     void onHandleUno(ActionEvent event) {
-        // Implement logic to handle Uno event here
+        threadSingUNOMachine.setButtonUNOPressed(true);
+        showAdviseUnoTemporarily(adviseUnoPlayer);
+    }
+
+    /**
+     * Updates visible cards in the player's hand
+     */
+    public void updateVisibleCardsHumanPlayer() {
+        printCardsHumanPlayer();
+    }
+
+    public void checkNumberCards(int numberCards, String typePlayer) {
+        if(numberCards == 1){
+            if(Objects.equals(typePlayer, "HUMAN_PLAYER")){
+                setDisableButton(false);
+                threadSingUNOMachine.setRunning(true);
+                threadSingUNOMachine.setButtonUNOPressed(false);
+            }
+            else{
+                showAdviseUnoTemporarily(adviseUnoMachine);
+            }
+        }
+    }
+
+    public void setDisableButton(boolean disable){
+        buttonUNO.setDisable(disable);
+    }
+
+    private void showAdviseUnoTemporarily(ImageView adviseUno) {
+        adviseUno.setVisible(true);
+        Timeline timeline = new Timeline(new KeyFrame(
+                Duration.seconds(2),
+                event -> adviseUno.setVisible(false)
+        ));
+        timeline.setCycleCount(1);
+        timeline.play(); // Start animation
     }
 
     public void discardCard(Card card) {
