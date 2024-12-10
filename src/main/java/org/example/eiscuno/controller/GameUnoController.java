@@ -11,6 +11,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Arc;
@@ -24,6 +25,8 @@ import org.example.eiscuno.model.player.Player;
 import org.example.eiscuno.model.table.Table;
 import javafx.animation.FadeTransition;
 import javafx.animation.TranslateTransition;
+
+import javax.swing.*;
 import java.util.Objects;
 
 /**
@@ -54,6 +57,9 @@ public class GameUnoController {
 
     @FXML
     private ImageView adviseUnoMachine;
+
+    @FXML
+    private AnchorPane pieAnchorPane;
 
     private Player humanPlayer;
     private Player machinePlayer;
@@ -96,16 +102,16 @@ public class GameUnoController {
     private void startGameWithAnimation() {
         gameUno.startGame();
 
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 4; i++) {
             Card humanCard = humanPlayer.getCard(i);
             animateCardDeal(humanCard, gridPaneCardsPlayer, i);
         }
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 4; i++) {
             Card machineCard = machinePlayer.getCard(i);
             animateCardDeal(machineCard, gridPaneCardsMachine, i);
         }
 
-        PauseTransition pause = new PauseTransition(Duration.seconds(2)); // Esperar 2 segundos
+        PauseTransition pause = new PauseTransition(Duration.seconds(2));
         pause.setOnFinished(event -> {
             printCardsHumanPlayer();
             printCardsMachinePlayer();
@@ -174,15 +180,14 @@ public class GameUnoController {
         switch (card.getValue()) {
             case "FOUR":
                 gameUno.eatCard(targetPlayer, 4);
-
+                pieAnchorPane.setVisible(true);
                 break;
             case "TWO":
                 gameUno.eatCard(targetPlayer, 2);
                 nextTurn();
                 break;
             case "WILD":
-
-                break;
+                pieAnchorPane.setVisible(true);
             case "SKIP":
                 break;
             case "REVERSE":
@@ -208,18 +213,32 @@ public class GameUnoController {
         return -1;
     }
 
-    public void handleColorSelection(ActionEvent event){
-        Arc arc = (Arc) event.getSource();
-        Paint color = arc.getFill();
-        if (color == Color.RED){
-            table.setCurrentColor("RED");
-        } else if(color == Color.BLUE){
-            table.setCurrentColor("BLUE");
-        } else if(color == Color.GREEN){
-            table.setCurrentColor("GREEN");
-        } else if(color == Color.YELLOW){
-            table.setCurrentColor("YELLOW");
-        }
+    @FXML
+    private void setBlueColor(){
+        this.table.setCurrentColor("BLUE");
+        this.pieAnchorPane.setVisible(false);
+        nextTurn();
+    }
+
+    @FXML
+    private void setRedColor(){
+        this.table.setCurrentColor("RED");
+        this.pieAnchorPane.setVisible(false);
+        nextTurn();
+    }
+
+    @FXML
+    private void setYellowColor(){
+        this.table.setCurrentColor("YELLOW");
+        this.pieAnchorPane.setVisible(false);
+        nextTurn();
+    }
+
+    @FXML
+    private void setGreenColor(){
+        this.table.setCurrentColor("GREEN");
+        this.pieAnchorPane.setVisible(false);
+        nextTurn();
     }
 
     public void nextTurn(){

@@ -32,7 +32,7 @@ public class ThreadPlayMachine extends Thread{
                     Thread.sleep((long) (/*Math.random() */ 3000));
                     putCardOnTheTable();
                 }
-            } catch (InterruptedException | IOException e){
+            } catch (IOException | InterruptedException e){
                 e.printStackTrace();
             }
         }
