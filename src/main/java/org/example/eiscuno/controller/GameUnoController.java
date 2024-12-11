@@ -120,10 +120,8 @@ public class GameUnoController {
             table.addCardOnTheTable(firstCard);
             tableImageView.setImage(firstCard.getImage());
             threadPlayMachine.start();
-            System.out.println("Pausa finalizada, procediendo con el juego.");
         });
         pause.play();
-        System.out.println("Pausa iniciada, procediendo con el juego.");
     }
 
     /**
@@ -145,10 +143,8 @@ public class GameUnoController {
                     printCardsHumanPlayer();
 
                     handleCardAction(machinePlayer, card);
-
+                    setDisableButton(true);
                     checkNumberCards(humanPlayer.getCardsPlayer().size(), humanPlayer.getTypePlayer());
-
-                    checkNumberCards(machinePlayer.getCardsPlayer().size(), machinePlayer.getTypePlayer());
                 }
             });
             this.gridPaneCardsPlayer.add(cardImageView, i, 0);
@@ -166,6 +162,7 @@ public class GameUnoController {
                 gridPaneCardsMachine.add(cardImageView, i , 0);
 
                 machineCardsLabel.setText("Cartas de la máquina: " + machinePlayer.getCardsPlayer().size());
+                checkNumberCards(machinePlayer.getCardsPlayer().size(), machinePlayer.getTypePlayer());
             }
     }
 
@@ -278,6 +275,7 @@ public class GameUnoController {
     @FXML
     void onHandleTakeCard() {
         gameUno.eatCard(humanPlayer, 1);
+        setDisableButton(true);
         printCardsHumanPlayer();
     }
 
@@ -319,7 +317,7 @@ public class GameUnoController {
     private void showAdviseUnoTemporarily(ImageView adviseUno) {
         adviseUno.setVisible(true);
         Timeline timeline = new Timeline(new KeyFrame(
-                Duration.seconds(2),
+                Duration.seconds(3),
                 event -> adviseUno.setVisible(false)
         ));
         timeline.setCycleCount(1);
