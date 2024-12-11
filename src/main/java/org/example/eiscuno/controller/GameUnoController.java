@@ -5,6 +5,7 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.control.Button;
 import javafx.scene.image.ImageView;
@@ -28,6 +29,7 @@ import javafx.animation.TranslateTransition;
 
 import javax.swing.*;
 import java.util.Objects;
+import java.util.Random;
 
 /**
  * Controller class for the Uno game.
@@ -181,6 +183,9 @@ public class GameUnoController {
             case "FOUR":
                 gameUno.eatCard(targetPlayer, 4);
                 pieAnchorPane.setVisible(true);
+                tableImageView.setVisible(false);
+                showUpMessage("+4");
+                if (targetPlayer == humanPlayer){ handleMachineColorSelection(); }
                 break;
             case "TWO":
                 gameUno.eatCard(targetPlayer, 2);
@@ -188,9 +193,14 @@ public class GameUnoController {
                 break;
             case "WILD":
                 pieAnchorPane.setVisible(true);
+                tableImageView.setVisible(false);
+                showUpMessage("+2");
+                if (targetPlayer == humanPlayer){ handleMachineColorSelection(); }
             case "SKIP":
+                showUpMessage("TURNO SALTADO");
                 break;
             case "REVERSE":
+                showUpMessage("SENTIDO CAMBIADO");
                 break;
             default:
                 nextTurn();
@@ -213,11 +223,31 @@ public class GameUnoController {
         return -1;
     }
 
+    private void handleMachineColorSelection(){
+        Random rand = new Random();
+        int num = rand.nextInt(4);
+        switch (num){
+            case 0:
+                setBlueColor();
+                break;
+            case 1:
+                setRedColor();
+                break;
+            case 2:
+                setYellowColor();
+                break;
+            case 3:
+                setGreenColor();
+                break;
+        }
+    }
+
     @FXML
     private void setBlueColor(){
         this.table.setCurrentColor("BLUE");
         this.pieAnchorPane.setVisible(false);
         nextTurn();
+        tableImageView.setVisible(true);
     }
 
     @FXML
@@ -225,6 +255,7 @@ public class GameUnoController {
         this.table.setCurrentColor("RED");
         this.pieAnchorPane.setVisible(false);
         nextTurn();
+        tableImageView.setVisible(true);
     }
 
     @FXML
@@ -232,6 +263,7 @@ public class GameUnoController {
         this.table.setCurrentColor("YELLOW");
         this.pieAnchorPane.setVisible(false);
         nextTurn();
+        tableImageView.setVisible(true);
     }
 
     @FXML
@@ -239,6 +271,7 @@ public class GameUnoController {
         this.table.setCurrentColor("GREEN");
         this.pieAnchorPane.setVisible(false);
         nextTurn();
+        tableImageView.setVisible(true);
     }
 
     public void nextTurn(){
@@ -353,5 +386,11 @@ public class GameUnoController {
         fadeIn.setToValue(1);
         fadeIn.setDelay(Duration.seconds(position * 0.2)); // Retraso para cada carta
         fadeIn.play();
+    }
+
+    private void showUpMessage(String message){
+        Label messageLabel = new Label();
+        messageLabel.setAlignment(Pos.CENTER);
+        messageLabel.setText(message);
     }
 }

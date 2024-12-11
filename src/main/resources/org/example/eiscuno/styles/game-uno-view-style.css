@@ -1,5 +1,82 @@
+@font-face {
+    font-family: 'uno_font';
+    src: url('../fonts/Cabin-Bold.ttf');
+}
+
 .root {
     -fx-background-image: url("../images/game_background.jpg") format("truetype");
     -fx-background-size: cover;
     -fx-background-position: center;
+}
+
+.button {
+    -fx-background-color: transparent;
+    -fx-font-weight: 100;
+    -fx-border-color: transparent;
+    -fx-background-radius: 10px;
+    -fx-alignment: center;
+    -fx-font-family: 'Cabin Bold';
+    -fx-text-fill: rgba(249, 219, 39, 1);
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 10, 0.7, 2, 2);
+}
+
+.exitButton {
+    -fx-font-size: 27px
+}
+
+.button:hover {
+    -fx-scale-x: 1.2;
+    -fx-scale-y: 1.2;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 10, 0.7, 2, 2);
+}
+
+ImageView:hover {
+    -fx-scale-x: 1.2;
+    -fx-scale-y: 1.2;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 10, 0.7, 2, 2);
+}
+
+.centerImage:hover{
+    -fx-scale-x: 1;
+    -fx-scale-y: 1;
+}
+
+#yellowArc {
+    -fx-fill: rgba(255, 219, 0, 1);
+}
+
+#greenArc {
+    -fx-fill: rgba(59, 164, 69, 1);
+}
+
+#blueArc {
+    -fx-fill: rgba(0, 108, 183, 1);
+}
+
+#redArc {
+    -fx-fill: rgba(236, 33, 39, 1);
+}
+
+#yellowArc:hover {
+    -fx-scale-x: 1.2;
+    -fx-scale-y: 1.2;
+    -fx-effect: dropshadow(gaussian, rgba(255, 255, 0, 1.2), 20, 0.7, 0, 0);
+}
+
+#greenArc:hover {
+    -fx-scale-x: 1.2;
+    -fx-scale-y: 1.2;
+    -fx-effect: dropshadow(gaussian, rgba(105, 255, 65, 1.2), 20, 0.7, 0, 0);
+}
+
+#blueArc:hover {
+    -fx-scale-x: 1.2;
+    -fx-scale-y: 1.2;
+    -fx-effect: dropshadow(gaussian, rgba(50, 196, 255, 1.2), 20, 0.7, 0, 0);
+}
+
+#redArc:hover {
+    -fx-scale-x: 1.2;
+    -fx-scale-y: 1.2;
+    -fx-effect: dropshadow(gaussian, rgba(255, 0, 0, 1.2), 20, 0.7, 0, 0);
 }

@@ -6,8 +6,9 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.stage.Stage;
+import javafx.scene.image.Image;
+import javafx.scene.ImageCursor;
 import org.example.eiscuno.controller.GameUnoController;
-import org.example.eiscuno.controller.WelcomeController;
 
 import java.io.IOException;
 
@@ -44,6 +45,8 @@ public class GameUnoStage extends Stage {
             WindowEvent.consume();
             deleteInstance();
         });
+        ImageCursor customCursor = new ImageCursor(new Image(getClass().getResource("/org/example/eiscuno/images/cursor.png").toExternalForm()));
+        scene.setCursor(customCursor);
         show(); // Displays the stage
     }
 
