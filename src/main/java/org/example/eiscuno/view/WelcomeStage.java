@@ -9,7 +9,8 @@ import javafx.stage.Stage;
 import org.example.eiscuno.controller.WelcomeController;
 
 import java.io.IOException;
-import java.net.URL;
+import javafx.scene.image.Image;
+import javafx.scene.ImageCursor;
 
 /**
  * The {@code WelcomeStage} class represents the initial welcome window for the Battleship application.
@@ -45,6 +46,8 @@ public class WelcomeStage extends Stage {
             WindowEvent.consume();
             deleteInstance();
         });
+        ImageCursor customCursor = new ImageCursor(new Image(getClass().getResource("/org/example/eiscuno/images/cursor.png").toExternalForm()));
+        scene.setCursor(customCursor);
         show(); // Displays the stage
     }
 

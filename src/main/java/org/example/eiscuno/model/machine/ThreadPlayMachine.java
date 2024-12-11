@@ -29,10 +29,10 @@ public class ThreadPlayMachine extends Thread{
                 GameUnoController gameUnoController = GameUnoStage.getInstance().getGameUnoController();
                 this.currentTurn = gameUnoController.getCurrentTurn();
                 if (currentTurn == 1){
-                    Thread.sleep((long) (/*Math.random() */ 3000));
+                    Thread.sleep((long) (/*Math.random() **/ 3000));
                     putCardOnTheTable();
                 }
-            } catch (InterruptedException | IOException e){
+            } catch (IOException | InterruptedException e){
                 e.printStackTrace();
             }
         }
@@ -82,8 +82,7 @@ public class ThreadPlayMachine extends Thread{
         tableImageView.setImage(card.getImage());
         machinePlayer.removeCard(index);
 
-        gameUnoController.nextTurn();
+        gameUnoController.handleCardAction(this.gameUno.getHumanPlayer(), card);
         Platform.runLater(gameUnoController::printCardsMachinePlayer);
     }
-
 }
