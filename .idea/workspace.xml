@@ -113,7 +113,7 @@
   <component name="RunManager">
     <configuration name="Main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="org.example.eiscuno.Main" />
-      <module name="eisc-uno" />
+      <module name="MiniProject3" />
       <extension name="coverage">
         <pattern>
           <option name="PATTERN" value="org.example.eiscuno.*" />
@@ -166,9 +166,24 @@
     <option name="version" value="3" />
   </component>
   <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/org/example/eiscuno/controller/GameUnoController.java</url>
+          <line>181</line>
+          <option name="timeStamp" value="15" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+    <pin-to-top-manager>
+      <pinned-members>
+        <PinnedItemInfo parentTag="org.example.eiscuno.controller.GameUnoController" memberName="currentTurn" />
+      </pinned-members>
+    </pin-to-top-manager>
     <watches-manager>
       <configuration name="Application">
         <watch expression="((ThreadPlayMachine)this).currentVisibleCardsMachine" custom="org.example.eiscuno.model.machine.ThreadPlayMachine" />
+        <watch expression="gameUnoController" />
       </configuration>
     </watches-manager>
   </component>

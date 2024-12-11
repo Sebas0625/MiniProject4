@@ -147,6 +147,8 @@ public class GameUnoController {
 
                     handleCardAction(machinePlayer, card);
                     setDisableButton(true);
+                    nextTurn();
+
                     checkNumberCards(humanPlayer.getCardsPlayer().size(), humanPlayer.getTypePlayer());
                 }
             });
@@ -197,7 +199,6 @@ public class GameUnoController {
                 } else {
                     printCardsMachinePlayer();
                 }
-                nextTurn();
                 break;
             case "WILD":
                 pieAnchorPane.setVisible(true);
@@ -206,13 +207,15 @@ public class GameUnoController {
                 if (targetPlayer == humanPlayer){ handleMachineColorSelection(); }
             case "SKIP":
                 showUpMessage("TURNO SALTADO");
+                nextTurn();
                 break;
             case "REVERSE":
                 showUpMessage("SENTIDO CAMBIADO");
+                nextTurn();
                 break;
             default:
-                nextTurn();
                 System.out.println("La carta no tiene ninguna característica");
+                break;
         }
     }
 
@@ -259,7 +262,6 @@ public class GameUnoController {
         }
         this.table.setCurrentColor("BLUE");
         this.pieAnchorPane.setVisible(false);
-        nextTurn();
         tableImageView.setVisible(true);
     }
 
@@ -272,7 +274,6 @@ public class GameUnoController {
         }
         this.table.setCurrentColor("RED");
         this.pieAnchorPane.setVisible(false);
-        nextTurn();
         tableImageView.setVisible(true);
     }
 
@@ -285,7 +286,6 @@ public class GameUnoController {
         }
         this.table.setCurrentColor("YELLOW");
         this.pieAnchorPane.setVisible(false);
-        nextTurn();
         tableImageView.setVisible(true);
     }
 
@@ -298,7 +298,6 @@ public class GameUnoController {
         }
         this.table.setCurrentColor("GREEN");
         this.pieAnchorPane.setVisible(false);
-        nextTurn();
         tableImageView.setVisible(true);
     }
 
@@ -341,7 +340,7 @@ public class GameUnoController {
         gameUno.eatCard(humanPlayer, 1);
         setDisableButton(true);
         if (this.posInitCardToShow < this.humanPlayer.getCardsPlayer().size() - 4) {
-            this.posInitCardToShow++;
+            posInitCardToShow = humanPlayer.getCardsPlayer().size() - 4;
         }
         printCardsHumanPlayer();
     }

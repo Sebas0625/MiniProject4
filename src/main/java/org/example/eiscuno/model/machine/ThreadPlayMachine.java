@@ -16,21 +16,30 @@ import java.io.IOException;
 public class ThreadPlayMachine extends Thread{
     private final GameUno gameUno;
     private final ImageView tableImageView;
-    private volatile int currentTurn;
+    private volatile boolean running = true;
+    private volatile boolean machinePlaying = false;
 
     public ThreadPlayMachine(GameUno gameUno, ImageView tableImageView) {
         this.gameUno = gameUno;
         this.tableImageView = tableImageView;
     }
 
+    public void stopThread(){
+        running = false;
+    }
+
     public void run(){
-        while (true){
+        while (running){
             try {
                 GameUnoController gameUnoController = GameUnoStage.getInstance().getGameUnoController();
-                this.currentTurn = gameUnoController.getCurrentTurn();
-                if (currentTurn == 1){
+                int currentTurn = gameUnoController.getCurrentTurn();
+
+                if (currentTurn == 1 && !machinePlaying){
+                    machinePlaying = true;
                     Thread.sleep((long) (/*Math.random() **/ 3000));
                     putCardOnTheTable();
+                    gameUnoController.nextTurn();
+                    machinePlaying = false;
                 }
             } catch (IOException | InterruptedException e){
                 e.printStackTrace();
@@ -83,7 +92,8 @@ public class ThreadPlayMachine extends Thread{
         tableImageView.setImage(card.getImage());
         machinePlayer.removeCard(index);
 
-        gameUnoController.handleCardAction(this.gameUno.getHumanPlayer(), card);
-        Platform.runLater(gameUnoController::printCardsMachinePlayer);
+        Platform.runLater(() -> {
+            gameUnoController.printCardsMachinePlayer();
+            gameUnoController.handleCardAction(gameUno.getHumanPlayer(), card); });
     }
 }
