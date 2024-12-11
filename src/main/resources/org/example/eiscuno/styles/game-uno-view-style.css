@@ -39,6 +39,7 @@ ImageView:hover {
 .centerImage:hover{
     -fx-scale-x: 1;
     -fx-scale-y: 1;
+    -fx-effect: none;
 }
 
 #yellowArc {

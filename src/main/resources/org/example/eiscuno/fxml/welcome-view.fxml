@@ -6,7 +6,7 @@
 
 <AnchorPane prefHeight="485.0" prefWidth="870.0" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.eiscuno.controller.WelcomeController">
    <children>
-      <Button fx:id="button" alignment="CENTER" contentDisplay="CENTER" layoutX="324.0" layoutY="348.0" mnemonicParsing="false" onAction="#handlePlay" prefHeight="126.0" prefWidth="222.0" styleClass="playButton" text="Jugar" textAlignment="CENTER">
+      <Button fx:id="button" alignment="CENTER" contentDisplay="CENTER" layoutX="318.0" layoutY="348.0" mnemonicParsing="false" onAction="#handlePlay" prefHeight="128.0" prefWidth="234.0" styleClass="playButton" text="Jugar" textAlignment="CENTER">
          <font>
             <Font size="60.0" />
          </font></Button>

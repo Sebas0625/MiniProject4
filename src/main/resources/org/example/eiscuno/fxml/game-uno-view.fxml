@@ -44,7 +44,7 @@
                </cursor></Button>
             <ImageView fx:id="adviseUnoMachine" fitHeight="53.0" fitWidth="58.0" layoutX="71.0" pickOnBounds="true" preserveRatio="true" visible="false">
                <image>
-                  <Image url="@images/uno-advice.png" />
+                  <Image url="@../images/uno-advice.png" />
                </image>
             </ImageView>
             <ImageView fx:id="adviseUnoPlayer" fitHeight="42.0" fitWidth="58.0" layoutX="72.0" layoutY="218.0" pickOnBounds="true" preserveRatio="true" visible="false">
