@@ -72,6 +72,7 @@ public class ThreadPlayMachine extends Thread{
             gameUno.eatCard(machinePlayer, 1);
             System.out.println("La máquina ha comido una carta");
             if (gameUnoController.isCardPosible(machinePlayer.getCard(machinePlayer.getCardsPlayer().size() - 1), table)){
+                index = machinePlayer.getCardsPlayer().size() - 1;
                 foundValidCard = true;
             }
         }

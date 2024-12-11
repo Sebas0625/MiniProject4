@@ -8,6 +8,7 @@ import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.control.Button;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
@@ -182,10 +183,20 @@ public class GameUnoController {
                 pieAnchorPane.setVisible(true);
                 tableImageView.setVisible(false);
                 showUpMessage("+4");
-                if (targetPlayer == humanPlayer){ handleMachineColorSelection(); }
+                if (targetPlayer == humanPlayer){
+                    printCardsHumanPlayer();
+                    handleMachineColorSelection();
+                } else {
+                    printCardsMachinePlayer();
+                }
                 break;
             case "TWO":
                 gameUno.eatCard(targetPlayer, 2);
+                if (targetPlayer == humanPlayer){
+                    printCardsHumanPlayer();
+                } else {
+                    printCardsMachinePlayer();
+                }
                 nextTurn();
                 break;
             case "WILD":
@@ -211,7 +222,7 @@ public class GameUnoController {
      * @param card the card to find
      * @return the position of the card, or -1 if not found
      */
-    private Integer findPosCardsHumanPlayer(Card card) {
+    public Integer findPosCardsHumanPlayer(Card card) {
         for (int i = 0; i < this.humanPlayer.getCardsPlayer().size(); i++) {
             if (this.humanPlayer.getCardsPlayer().get(i).equals(card)) {
                 return i;
@@ -241,6 +252,11 @@ public class GameUnoController {
 
     @FXML
     private void setBlueColor(){
+        if (table.getCurrentCardOnTheTable().getValue() == "WILD"){
+            tableImageView.setImage(new Image(getClass().getResource("/org/example/eiscuno/cards-uno/BLUE_wild.png").toExternalForm()));
+        } else{
+            tableImageView.setImage(new Image(getClass().getResource("/org/example/eiscuno/cards-uno/BLUE_4_wild_draw.png").toExternalForm()));
+        }
         this.table.setCurrentColor("BLUE");
         this.pieAnchorPane.setVisible(false);
         nextTurn();
@@ -249,6 +265,11 @@ public class GameUnoController {
 
     @FXML
     private void setRedColor(){
+        if (table.getCurrentCardOnTheTable().getValue() == "WILD"){
+            tableImageView.setImage(new Image(getClass().getResource("/org/example/eiscuno/cards-uno/RED_wild.png").toExternalForm()));
+        } else{
+            tableImageView.setImage(new Image(getClass().getResource("/org/example/eiscuno/cards-uno/RED_4_wild_draw.png").toExternalForm()));
+        }
         this.table.setCurrentColor("RED");
         this.pieAnchorPane.setVisible(false);
         nextTurn();
@@ -257,6 +278,11 @@ public class GameUnoController {
 
     @FXML
     private void setYellowColor(){
+        if (table.getCurrentCardOnTheTable().getValue() == "WILD"){
+            tableImageView.setImage(new Image(getClass().getResource("/org/example/eiscuno/cards-uno/YELLOW_wild.png").toExternalForm()));
+        } else{
+            tableImageView.setImage(new Image(getClass().getResource("/org/example/eiscuno/cards-uno/YELLOW_4_wild_draw.png").toExternalForm()));
+        }
         this.table.setCurrentColor("YELLOW");
         this.pieAnchorPane.setVisible(false);
         nextTurn();
@@ -265,6 +291,11 @@ public class GameUnoController {
 
     @FXML
     private void setGreenColor(){
+        if (table.getCurrentCardOnTheTable().getValue() == "WILD"){
+            tableImageView.setImage(new Image(getClass().getResource("/org/example/eiscuno/cards-uno/GREEN_wild.png").toExternalForm()));
+        } else{
+            tableImageView.setImage(new Image(getClass().getResource("/org/example/eiscuno/cards-uno/GREEN_4_wild_draw.png").toExternalForm()));
+        }
         this.table.setCurrentColor("GREEN");
         this.pieAnchorPane.setVisible(false);
         nextTurn();
@@ -309,6 +340,9 @@ public class GameUnoController {
     void onHandleTakeCard() {
         gameUno.eatCard(humanPlayer, 1);
         setDisableButton(true);
+        if (this.posInitCardToShow < this.humanPlayer.getCardsPlayer().size() - 4) {
+            this.posInitCardToShow++;
+        }
         printCardsHumanPlayer();
     }
 
