@@ -27,6 +27,7 @@ import org.example.eiscuno.model.player.Player;
 import org.example.eiscuno.model.table.Table;
 import javafx.animation.FadeTransition;
 import javafx.animation.TranslateTransition;
+import org.example.eiscuno.view.GameUnoStage;
 import org.example.eiscuno.view.LoseStage;
 import org.example.eiscuno.view.WinStage;
 
@@ -390,6 +391,7 @@ public class GameUnoController {
             }
         }
         else if(numberCards == 0){
+            GameUnoStage.closeInstance();
             if(Objects.equals(typePlayer, "HUMAN_PLAYER")){
                 WinStage.getInstance();
             }
