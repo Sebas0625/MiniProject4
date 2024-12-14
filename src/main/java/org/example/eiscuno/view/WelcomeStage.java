@@ -54,7 +54,7 @@ public class WelcomeStage extends Stage {
     /**
      * Holder class for implementing the Singleton pattern for {@code WelcomeStage}.
      */
-    private static class WelcomeStageHolder {
+    private static class LoseStageHolder {
         private static WelcomeStage INSTANCE;
     }
 
@@ -66,9 +66,9 @@ public class WelcomeStage extends Stage {
      * @throws IOException If an error occurs during the loading of the FXML file.
      */
     public static WelcomeStage getInstance() throws IOException {
-        WelcomeStageHolder.INSTANCE =
-                WelcomeStageHolder.INSTANCE != null ? WelcomeStageHolder.INSTANCE : new WelcomeStage();
-        return WelcomeStageHolder.INSTANCE;
+        LoseStageHolder.INSTANCE =
+                LoseStageHolder.INSTANCE != null ? LoseStageHolder.INSTANCE : new WelcomeStage();
+        return LoseStageHolder.INSTANCE;
     }
 
     /**
@@ -81,8 +81,8 @@ public class WelcomeStage extends Stage {
         alert.setHeaderText("¿Seguro que desea cerrar la ventana?");
         alert.setContentText("Perderá el progreso actual.");
         if (alert.showAndWait().get() == ButtonType.OK) {
-            WelcomeStageHolder.INSTANCE.close();
-            WelcomeStageHolder.INSTANCE = null;
+            LoseStageHolder.INSTANCE.close();
+            LoseStageHolder.INSTANCE = null;
         }
     }
 
@@ -90,8 +90,8 @@ public class WelcomeStage extends Stage {
      * Closes the current instance of {@code WelcomeStage} and sets it to null.
      */
     public static void closeInstance() {
-        WelcomeStageHolder.INSTANCE.close();
-        WelcomeStageHolder.INSTANCE = null;
+        LoseStageHolder.INSTANCE.close();
+        LoseStageHolder.INSTANCE = null;
     }
 
     /**

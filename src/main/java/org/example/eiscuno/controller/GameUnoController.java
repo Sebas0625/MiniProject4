@@ -27,8 +27,11 @@ import org.example.eiscuno.model.player.Player;
 import org.example.eiscuno.model.table.Table;
 import javafx.animation.FadeTransition;
 import javafx.animation.TranslateTransition;
+import org.example.eiscuno.view.LoseStage;
+import org.example.eiscuno.view.WinStage;
 
 import javax.swing.*;
+import java.io.IOException;
 import java.util.Objects;
 import java.util.Random;
 
@@ -363,7 +366,7 @@ public class GameUnoController {
         printCardsHumanPlayer();
     }
 
-    public void checkNumberCards(int numberCards, String typePlayer) {
+    public void checkNumberCards(int numberCards, String typePlayer){
         if(numberCards == 1){
             if(Objects.equals(typePlayer, "HUMAN_PLAYER")){
                 setDisableButton(false);

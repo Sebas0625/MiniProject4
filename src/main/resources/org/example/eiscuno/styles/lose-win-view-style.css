@@ -1,0 +1,36 @@
+#anchorPane{
+    -fx-background-image: url("../images/backgroundRed.png");
+    -fx-background-size: cover;
+    -fx-background-position: center;
+}
+
+#exitButton{
+    -fx-background-color: #c62483;
+    -fx-text-fill: #fff;
+    -fx-font-family: "Consolas";
+    -fx-font-weight: bold;
+    -fx-cursor: "hand";
+}
+
+#exitButton:hover{
+    -fx-background-color: #e80c8e;
+    -fx-scale-x: 1.1;
+    -fx-scale-y: 1.1;
+}
+
+#continueButton{
+    -fx-background-color: #5dbd74;
+    -fx-text-fill: #fff;
+    -fx-font-family: "Bebas Neue";
+    -fx-font-weight: bold;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-cursor: "hand";
+    -fx-transition: transform 0.5s ease, background-color 0.5s ease;
+}
+
+#continueButton:hover{
+    -fx-background-color: #2bdf4f;
+    -fx-scale-x: 1.1;
+    -fx-scale-y: 1.1;
+}
