@@ -17,9 +17,9 @@ public class LoseWinController {
 
     @FXML
     public void handleClickContinueLose(ActionEvent event) throws IOException {
-        //GameUnoStage.closeInstance();
+        GameUnoStage.closeInstance();
         LoseStage.closeInstance();
-        //WelcomeStage.getInstance();
+        WelcomeStage.getInstance();
     }
 
     @FXML
@@ -29,8 +29,8 @@ public class LoseWinController {
 
     @FXML
     public void handleClickContinueWin(ActionEvent event) throws IOException {
-        //GameUnoStage.closeInstance();
+        GameUnoStage.closeInstance();
         WinStage.closeInstance();
-        //WelcomeStage.getInstance();
+        WelcomeStage.getInstance();
     }
 }

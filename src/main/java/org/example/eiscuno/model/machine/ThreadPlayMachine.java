@@ -93,7 +93,16 @@ public class ThreadPlayMachine extends Thread{
         machinePlayer.removeCard(index);
 
         Platform.runLater(() -> {
-            gameUnoController.printCardsMachinePlayer();
-            gameUnoController.handleCardAction(gameUno.getHumanPlayer(), card); });
+            try {
+                gameUnoController.printCardsMachinePlayer();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            try {
+                gameUnoController.handleCardAction(gameUno.getHumanPlayer(), card);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 }

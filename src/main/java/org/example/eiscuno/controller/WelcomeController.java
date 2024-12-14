@@ -17,7 +17,6 @@ public class WelcomeController {
     }
 
     public void handleCredits(ActionEvent event) throws IOException {
-        WinStage.getInstance();
     }
 
     public void handleExit(ActionEvent event){

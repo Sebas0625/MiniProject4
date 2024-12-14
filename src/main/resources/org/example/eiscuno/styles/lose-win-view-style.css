@@ -21,7 +21,7 @@
 #continueButton{
     -fx-background-color: #5dbd74;
     -fx-text-fill: #fff;
-    -fx-font-family: "Bebas Neue";
+    -fx-font-family: "Monospaced";
     -fx-font-weight: bold;
     -fx-border-radius: 10;
     -fx-background-radius: 10;

@@ -120,7 +120,11 @@ public class GameUnoController {
         PauseTransition pause = new PauseTransition(Duration.seconds(2));
         pause.setOnFinished(event -> {
             printCardsHumanPlayer();
-            printCardsMachinePlayer();
+            try {
+                printCardsMachinePlayer();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
 
             Card firstCard = gameUno.getDeck().takeCard();
             table.addCardOnTheTable(firstCard);
@@ -148,11 +152,19 @@ public class GameUnoController {
                     humanPlayer.removeCard(findPosCardsHumanPlayer(card));
                     printCardsHumanPlayer();
 
-                    handleCardAction(machinePlayer, card);
+                    try {
+                        handleCardAction(machinePlayer, card);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
                     setDisableButton(true);
                     nextTurn();
 
-                    checkNumberCards(humanPlayer.getCardsPlayer().size(), humanPlayer.getTypePlayer());
+                    try {
+                        checkNumberCards(humanPlayer.getCardsPlayer().size(), humanPlayer.getTypePlayer());
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             });
             this.gridPaneCardsPlayer.add(cardImageView, i, 0);
@@ -170,7 +182,6 @@ public class GameUnoController {
                 gridPaneCardsMachine.add(cardImageView, i , 0);
 
                 machineCardsLabel.setText("Cartas de la máquina: " + machinePlayer.getCardsPlayer().size());
-                checkNumberCards(machinePlayer.getCardsPlayer().size(), machinePlayer.getTypePlayer());
             }
     }
 
@@ -181,7 +192,7 @@ public class GameUnoController {
                 || Objects.equals(card.getValue(), "FOUR");
     }
 
-    public void handleCardAction(Player targetPlayer, Card card){
+    public void handleCardAction(Player targetPlayer, Card card) throws Exception {
         switch (card.getValue()) {
             case "FOUR":
                 gameUno.eatCard(targetPlayer, 4);
@@ -220,6 +231,7 @@ public class GameUnoController {
                 System.out.println("La carta no tiene ninguna característica");
                 break;
         }
+        checkNumberCards(machinePlayer.getCardsPlayer().size(), machinePlayer.getTypePlayer());
     }
 
     /**
@@ -366,7 +378,7 @@ public class GameUnoController {
         printCardsHumanPlayer();
     }
 
-    public void checkNumberCards(int numberCards, String typePlayer){
+    public void checkNumberCards(int numberCards, String typePlayer) throws Exception{
         if(numberCards == 1){
             if(Objects.equals(typePlayer, "HUMAN_PLAYER")){
                 setDisableButton(false);
@@ -375,6 +387,14 @@ public class GameUnoController {
             }
             else{
                 showAdviseUnoTemporarily(adviseUnoMachine);
+            }
+        }
+        else if(numberCards == 0){
+            if(Objects.equals(typePlayer, "HUMAN_PLAYER")){
+                WinStage.getInstance();
+            }
+            else{
+                LoseStage.getInstance();
             }
         }
     }
