@@ -32,7 +32,7 @@
                   <Font name="Berlin Sans FB Demi Bold" size="50.0" />
                </font>
             </Text>
-            <Button fx:id="continueButton" mnemonicParsing="false" onAction="#handleClickExitWin" prefHeight="40.0" prefWidth="108.0" text="Continuar">
+            <Button fx:id="continueButton" mnemonicParsing="false" onAction="#handleClickContinueWin" prefHeight="40.0" prefWidth="108.0" text="Continuar">
                <font>
                   <Font size="16.0" />
                </font>
