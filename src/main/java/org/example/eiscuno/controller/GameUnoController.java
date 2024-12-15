@@ -8,6 +8,7 @@ import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.control.Button;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
@@ -26,8 +27,12 @@ import org.example.eiscuno.model.player.Player;
 import org.example.eiscuno.model.table.Table;
 import javafx.animation.FadeTransition;
 import javafx.animation.TranslateTransition;
+import org.example.eiscuno.view.GameUnoStage;
+import org.example.eiscuno.view.LoseStage;
+import org.example.eiscuno.view.WinStage;
 
 import javax.swing.*;
+import java.io.IOException;
 import java.util.Objects;
 import java.util.Random;
 
@@ -116,7 +121,11 @@ public class GameUnoController {
         PauseTransition pause = new PauseTransition(Duration.seconds(2));
         pause.setOnFinished(event -> {
             printCardsHumanPlayer();
-            printCardsMachinePlayer();
+            try {
+                printCardsMachinePlayer();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
 
             Card firstCard = gameUno.getDeck().takeCard();
             table.addCardOnTheTable(firstCard);
@@ -144,9 +153,19 @@ public class GameUnoController {
                     humanPlayer.removeCard(findPosCardsHumanPlayer(card));
                     printCardsHumanPlayer();
 
-                    handleCardAction(machinePlayer, card);
+                    try {
+                        handleCardAction(machinePlayer, card);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
                     setDisableButton(true);
-                    checkNumberCards(humanPlayer.getCardsPlayer().size(), humanPlayer.getTypePlayer());
+                    nextTurn();
+
+                    try {
+                        checkNumberCards(humanPlayer.getCardsPlayer().size(), humanPlayer.getTypePlayer());
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             });
             this.gridPaneCardsPlayer.add(cardImageView, i, 0);
@@ -164,7 +183,6 @@ public class GameUnoController {
                 gridPaneCardsMachine.add(cardImageView, i , 0);
 
                 machineCardsLabel.setText("Cartas de la máquina: " + machinePlayer.getCardsPlayer().size());
-                checkNumberCards(machinePlayer.getCardsPlayer().size(), machinePlayer.getTypePlayer());
             }
     }
 
@@ -175,18 +193,27 @@ public class GameUnoController {
                 || Objects.equals(card.getValue(), "FOUR");
     }
 
-    public void handleCardAction(Player targetPlayer, Card card){
+    public void handleCardAction(Player targetPlayer, Card card) throws Exception {
         switch (card.getValue()) {
             case "FOUR":
                 gameUno.eatCard(targetPlayer, 4);
                 pieAnchorPane.setVisible(true);
                 tableImageView.setVisible(false);
                 showUpMessage("+4");
-                if (targetPlayer == humanPlayer){ handleMachineColorSelection(); }
+                if (targetPlayer == humanPlayer){
+                    printCardsHumanPlayer();
+                    handleMachineColorSelection();
+                } else {
+                    printCardsMachinePlayer();
+                }
                 break;
             case "TWO":
                 gameUno.eatCard(targetPlayer, 2);
-                nextTurn();
+                if (targetPlayer == humanPlayer){
+                    printCardsHumanPlayer();
+                } else {
+                    printCardsMachinePlayer();
+                }
                 break;
             case "WILD":
                 pieAnchorPane.setVisible(true);
@@ -195,14 +222,17 @@ public class GameUnoController {
                 if (targetPlayer == humanPlayer){ handleMachineColorSelection(); }
             case "SKIP":
                 showUpMessage("TURNO SALTADO");
+                nextTurn();
                 break;
             case "REVERSE":
                 showUpMessage("SENTIDO CAMBIADO");
+                nextTurn();
                 break;
             default:
-                nextTurn();
                 System.out.println("La carta no tiene ninguna característica");
+                break;
         }
+        checkNumberCards(machinePlayer.getCardsPlayer().size(), machinePlayer.getTypePlayer());
     }
 
     /**
@@ -211,7 +241,7 @@ public class GameUnoController {
      * @param card the card to find
      * @return the position of the card, or -1 if not found
      */
-    private Integer findPosCardsHumanPlayer(Card card) {
+    public Integer findPosCardsHumanPlayer(Card card) {
         for (int i = 0; i < this.humanPlayer.getCardsPlayer().size(); i++) {
             if (this.humanPlayer.getCardsPlayer().get(i).equals(card)) {
                 return i;
@@ -241,33 +271,49 @@ public class GameUnoController {
 
     @FXML
     private void setBlueColor(){
+        if (table.getCurrentCardOnTheTable().getValue() == "WILD"){
+            tableImageView.setImage(new Image(getClass().getResource("/org/example/eiscuno/cards-uno/BLUE_wild.png").toExternalForm()));
+        } else{
+            tableImageView.setImage(new Image(getClass().getResource("/org/example/eiscuno/cards-uno/BLUE_4_wild_draw.png").toExternalForm()));
+        }
         this.table.setCurrentColor("BLUE");
         this.pieAnchorPane.setVisible(false);
-        nextTurn();
         tableImageView.setVisible(true);
     }
 
     @FXML
     private void setRedColor(){
+        if (table.getCurrentCardOnTheTable().getValue() == "WILD"){
+            tableImageView.setImage(new Image(getClass().getResource("/org/example/eiscuno/cards-uno/RED_wild.png").toExternalForm()));
+        } else{
+            tableImageView.setImage(new Image(getClass().getResource("/org/example/eiscuno/cards-uno/RED_4_wild_draw.png").toExternalForm()));
+        }
         this.table.setCurrentColor("RED");
         this.pieAnchorPane.setVisible(false);
-        nextTurn();
         tableImageView.setVisible(true);
     }
 
     @FXML
     private void setYellowColor(){
+        if (table.getCurrentCardOnTheTable().getValue() == "WILD"){
+            tableImageView.setImage(new Image(getClass().getResource("/org/example/eiscuno/cards-uno/YELLOW_wild.png").toExternalForm()));
+        } else{
+            tableImageView.setImage(new Image(getClass().getResource("/org/example/eiscuno/cards-uno/YELLOW_4_wild_draw.png").toExternalForm()));
+        }
         this.table.setCurrentColor("YELLOW");
         this.pieAnchorPane.setVisible(false);
-        nextTurn();
         tableImageView.setVisible(true);
     }
 
     @FXML
     private void setGreenColor(){
+        if (table.getCurrentCardOnTheTable().getValue() == "WILD"){
+            tableImageView.setImage(new Image(getClass().getResource("/org/example/eiscuno/cards-uno/GREEN_wild.png").toExternalForm()));
+        } else{
+            tableImageView.setImage(new Image(getClass().getResource("/org/example/eiscuno/cards-uno/GREEN_4_wild_draw.png").toExternalForm()));
+        }
         this.table.setCurrentColor("GREEN");
         this.pieAnchorPane.setVisible(false);
-        nextTurn();
         tableImageView.setVisible(true);
     }
 
@@ -309,6 +355,9 @@ public class GameUnoController {
     void onHandleTakeCard() {
         gameUno.eatCard(humanPlayer, 1);
         setDisableButton(true);
+        if (this.posInitCardToShow < this.humanPlayer.getCardsPlayer().size() - 4) {
+            posInitCardToShow = humanPlayer.getCardsPlayer().size() - 4;
+        }
         printCardsHumanPlayer();
     }
 
@@ -330,7 +379,7 @@ public class GameUnoController {
         printCardsHumanPlayer();
     }
 
-    public void checkNumberCards(int numberCards, String typePlayer) {
+    public void checkNumberCards(int numberCards, String typePlayer) throws Exception{
         if(numberCards == 1){
             if(Objects.equals(typePlayer, "HUMAN_PLAYER")){
                 setDisableButton(false);
@@ -339,6 +388,15 @@ public class GameUnoController {
             }
             else{
                 showAdviseUnoTemporarily(adviseUnoMachine);
+            }
+        }
+        else if(numberCards == 0){
+            GameUnoStage.closeInstance();
+            if(Objects.equals(typePlayer, "HUMAN_PLAYER")){
+                WinStage.getInstance();
+            }
+            else{
+                LoseStage.getInstance();
             }
         }
     }

@@ -16,21 +16,30 @@ import java.io.IOException;
 public class ThreadPlayMachine extends Thread{
     private final GameUno gameUno;
     private final ImageView tableImageView;
-    private volatile int currentTurn;
+    private volatile boolean running = true;
+    private volatile boolean machinePlaying = false;
 
     public ThreadPlayMachine(GameUno gameUno, ImageView tableImageView) {
         this.gameUno = gameUno;
         this.tableImageView = tableImageView;
     }
 
+    public void stopThread(){
+        running = false;
+    }
+
     public void run(){
-        while (true){
+        while (running){
             try {
                 GameUnoController gameUnoController = GameUnoStage.getInstance().getGameUnoController();
-                this.currentTurn = gameUnoController.getCurrentTurn();
-                if (currentTurn == 1){
+                int currentTurn = gameUnoController.getCurrentTurn();
+
+                if (currentTurn == 1 && !machinePlaying){
+                    machinePlaying = true;
                     Thread.sleep((long) (/*Math.random() **/ 3000));
                     putCardOnTheTable();
+                    gameUnoController.nextTurn();
+                    machinePlaying = false;
                 }
             } catch (IOException | InterruptedException e){
                 e.printStackTrace();
@@ -72,6 +81,7 @@ public class ThreadPlayMachine extends Thread{
             gameUno.eatCard(machinePlayer, 1);
             System.out.println("La máquina ha comido una carta");
             if (gameUnoController.isCardPosible(machinePlayer.getCard(machinePlayer.getCardsPlayer().size() - 1), table)){
+                index = machinePlayer.getCardsPlayer().size() - 1;
                 foundValidCard = true;
             }
         }
@@ -82,7 +92,17 @@ public class ThreadPlayMachine extends Thread{
         tableImageView.setImage(card.getImage());
         machinePlayer.removeCard(index);
 
-        gameUnoController.handleCardAction(this.gameUno.getHumanPlayer(), card);
-        Platform.runLater(gameUnoController::printCardsMachinePlayer);
+        Platform.runLater(() -> {
+            try {
+                gameUnoController.printCardsMachinePlayer();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            try {
+                gameUnoController.handleCardAction(gameUno.getHumanPlayer(), card);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 }

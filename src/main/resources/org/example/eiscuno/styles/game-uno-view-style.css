@@ -81,3 +81,13 @@ ImageView:hover {
     -fx-scale-y: 1.2;
     -fx-effect: dropshadow(gaussian, rgba(255, 0, 0, 1.2), 20, 0.7, 0, 0);
 }
+
+.labelPlayer{
+    -fx-background-color: #000;
+    -fx-text-fill: #fff;
+    -fx-padding: 5;
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+    -fx-font-family: "Marlett";
+    -fx-border-width: 2;
+}

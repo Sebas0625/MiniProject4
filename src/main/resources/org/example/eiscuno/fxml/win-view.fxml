@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<AnchorPane fx:id="anchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="430.0" prefWidth="650.0" stylesheets="@../styles/lose-win-view-style.css" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.eiscuno.controller.LoseWinController">
+   <children>
+      <ImageView fitHeight="194.0" fitWidth="201.0" layoutX="14.0" layoutY="232.0" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@../images/deck.png" />
+         </image>
+      </ImageView>
+      <ImageView fitHeight="161.0" fitWidth="429.0" layoutX="147.0" layoutY="22.0" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@../images/circle-vector.png" />
+         </image>
+      </ImageView>
+      <ImageView fitHeight="227.0" fitWidth="228.0" layoutX="208.0" layoutY="13.0" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@../images/icon-win.png" />
+         </image>
+      </ImageView>
+      <VBox alignment="CENTER" layoutX="200.0" layoutY="214.0" prefHeight="200.0" prefWidth="235.0" spacing="40.0">
+         <children>
+            <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="GANASTE" textAlignment="CENTER" wrappingWidth="243.458984375">
+               <font>
+                  <Font name="Berlin Sans FB Demi Bold" size="50.0" />
+               </font>
+            </Text>
+            <Button fx:id="continueButton" mnemonicParsing="false" onAction="#handleClickContinueWin" prefHeight="40.0" prefWidth="108.0" text="Continuar">
+               <font>
+                  <Font size="16.0" />
+               </font>
+            </Button>
+         </children>
+      </VBox>
+      <Button fx:id="exitButton" layoutX="611.0" layoutY="15.0" mnemonicParsing="false" onAction="#handleClickExitWin" prefHeight="25.0" prefWidth="28.0" stylesheets="@../styles/lose-win-view-style.css" text="X" />
+   </children>
+</AnchorPane>
