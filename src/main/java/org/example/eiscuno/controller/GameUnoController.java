@@ -473,4 +473,8 @@ public class GameUnoController {
             machineCardsLabel.setText("Cartas de la máquina: " + machinePlayer.getCardsPlayer().size());
         }
     }
+
+    public  GameUno getGameUno(){
+        return gameUno;
+    }
 }

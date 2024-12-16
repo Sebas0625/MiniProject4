@@ -76,4 +76,5 @@ public class ThreadSingUNOMachine implements Runnable {
         this.buttonUNOPressed = buttonUNOPressed;
     }
     public void setCurrentTurn(int currentTurn){ this.currentTurn = currentTurn;}
+    public boolean getButtonUNOPressed(){ return buttonUNOPressed;}
 }

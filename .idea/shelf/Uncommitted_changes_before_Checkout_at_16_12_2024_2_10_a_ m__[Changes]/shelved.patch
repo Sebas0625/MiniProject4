@@ -1,0 +1,255 @@
+Index: src/main/java/org/example/eiscuno/controller/GameUnoController.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package org.example.eiscuno.controller;\r\n\r\nimport javafx.animation.PauseTransition;\r\nimport javafx.animation.KeyFrame;\r\nimport javafx.animation.Timeline;\r\nimport javafx.event.ActionEvent;\r\nimport javafx.fxml.FXML;\r\nimport javafx.geometry.Pos;\r\nimport javafx.scene.control.Label;\r\nimport javafx.scene.control.Button;\r\nimport javafx.scene.image.Image;\r\nimport javafx.scene.image.ImageView;\r\nimport javafx.scene.input.MouseEvent;\r\nimport javafx.scene.layout.AnchorPane;\r\nimport javafx.scene.layout.GridPane;\r\nimport javafx.scene.layout.Pane;\r\nimport javafx.scene.paint.Color;\r\nimport javafx.scene.paint.Paint;\r\nimport javafx.scene.shape.Arc;\r\nimport javafx.util.Duration;\r\nimport org.example.eiscuno.model.card.Card;\r\nimport org.example.eiscuno.model.deck.Deck;\r\nimport org.example.eiscuno.model.game.GameUno;\r\nimport org.example.eiscuno.model.machine.ThreadSingUNOMachine;\r\nimport org.example.eiscuno.model.machine.ThreadPlayMachine;\r\nimport org.example.eiscuno.model.player.Player;\r\nimport org.example.eiscuno.model.table.Table;\r\nimport javafx.animation.FadeTransition;\r\nimport javafx.animation.TranslateTransition;\r\nimport org.example.eiscuno.view.GameUnoStage;\r\nimport org.example.eiscuno.view.LoseStage;\r\nimport org.example.eiscuno.view.WinStage;\r\n\r\nimport javax.swing.*;\r\nimport java.io.IOException;\r\nimport java.util.Objects;\r\nimport java.util.Random;\r\n\r\n/**\r\n * Controller class for the Uno game.\r\n */\r\npublic class GameUnoController {\r\n\r\n    @FXML\r\n    private GridPane gridPaneCardsMachine;\r\n\r\n    @FXML\r\n    private GridPane gridPaneCardsPlayer;\r\n\r\n    @FXML\r\n    private ImageView tableImageView;\r\n\r\n    @FXML\r\n    private Label machineCardsLabel;\r\n\r\n    @FXML\r\n    private Label humanPlayerCardsLabel;\r\n\r\n    @FXML\r\n    private Button buttonUNO;\r\n\r\n    @FXML\r\n    private ImageView adviseUnoPlayer;\r\n\r\n    @FXML\r\n    private ImageView adviseUnoMachine;\r\n\r\n    @FXML\r\n    private AnchorPane pieAnchorPane;\r\n\r\n    private Player humanPlayer;\r\n    private Player machinePlayer;\r\n    private Deck deck;\r\n    private Table table;\r\n    private GameUno gameUno;\r\n    private int posInitCardToShow;\r\n    private ThreadPlayMachine threadPlayMachine;\r\n    private ThreadSingUNOMachine threadSingUNOMachine;\r\n    private int currentTurn = 0;\r\n\r\n    /**\r\n     * Initializes the controller.\r\n     */\r\n    @FXML\r\n    public void initialize() {\r\n        initVariables();\r\n        startGameWithAnimation();\r\n    }\r\n\r\n    /**\r\n     * Initializes the variables for the game.\r\n     */\r\n    private void initVariables() {\r\n        this.humanPlayer = new Player(\"HUMAN_PLAYER\");\r\n        this.machinePlayer = new Player(\"MACHINE_PLAYER\");\r\n        this.deck = new Deck();\r\n        this.table = new Table();\r\n        this.gameUno = new GameUno(this.humanPlayer, this.machinePlayer, this.deck, this.table);\r\n        this.posInitCardToShow = 0;\r\n        this.threadPlayMachine = new ThreadPlayMachine(gameUno, tableImageView);\r\n        this.buttonUNO.setDisable(true);\r\n        this.threadSingUNOMachine = new ThreadSingUNOMachine(this.gameUno, this);\r\n        Thread t = new Thread(threadSingUNOMachine, \"ThreadSingUNO\");\r\n        t.setDaemon(true);\r\n        t.start();\r\n    }\r\n\r\n\r\n    private void startGameWithAnimation() {\r\n        gameUno.startGame();\r\n\r\n        for (int i = 0; i < 4; i++) {\r\n            Card humanCard = humanPlayer.getCard(i);\r\n            animateCardDeal(humanCard, gridPaneCardsPlayer, i);\r\n        }\r\n        for (int i = 0; i < 4; i++) {\r\n            Card machineCard = machinePlayer.getCard(i);\r\n            animateCardDeal(machineCard, gridPaneCardsMachine, i);\r\n        }\r\n\r\n        PauseTransition pause = new PauseTransition(Duration.seconds(2));\r\n        pause.setOnFinished(event -> {\r\n            printCardsHumanPlayer();\r\n            try {\r\n                printCardsMachinePlayer();\r\n            } catch (Exception e) {\r\n                throw new RuntimeException(e);\r\n            }\r\n\r\n            Card firstCard = gameUno.getDeck().takeCard();\r\n            table.addCardOnTheTable(firstCard);\r\n            tableImageView.setImage(firstCard.getImage());\r\n            threadPlayMachine.start();\r\n        });\r\n        pause.play();\r\n    }\r\n\r\n    /**\r\n     * Prints the human player's cards on the grid pane.\r\n     */\r\n    private void printCardsHumanPlayer() {\r\n        this.gridPaneCardsPlayer.getChildren().clear();\r\n        Card[] currentVisibleCardsHumanPlayer = this.gameUno.getCurrentVisibleCardsHumanPlayer(this.posInitCardToShow);\r\n\r\n        for (int i = 0; i < currentVisibleCardsHumanPlayer.length; i++) {\r\n            Card card = currentVisibleCardsHumanPlayer[i];\r\n            ImageView cardImageView = card.getCard();\r\n\r\n            cardImageView.setOnMouseClicked((MouseEvent event) -> {\r\n                if (isCardPosible(card, table) && currentTurn == 0){\r\n                    gameUno.playCard(card);\r\n                    tableImageView.setImage(card.getImage());\r\n                    humanPlayer.removeCard(findPosCardsHumanPlayer(card));\r\n                    printCardsHumanPlayer();\r\n\r\n                    try {\r\n                        handleCardAction(machinePlayer, card);\r\n                    } catch (Exception e) {\r\n                        throw new RuntimeException(e);\r\n                    }\r\n                    setDisableButton(true);\r\n                    nextTurn();\r\n\r\n                    try {\r\n                        checkNumberCards(humanPlayer.getCardsPlayer().size(), humanPlayer.getTypePlayer());\r\n                    } catch (Exception e) {\r\n                        throw new RuntimeException(e);\r\n                    }\r\n                }\r\n            });\r\n            this.gridPaneCardsPlayer.add(cardImageView, i, 0);\r\n        }\r\n        humanPlayerCardsLabel.setText(\"Tus cartas: \" + humanPlayer.getCardsPlayer().size());\r\n    }\r\n\r\n    public void printCardsMachinePlayer(){\r\n        Card[] currentVisibleCardsMachinePlayer = this.gameUno.getCurrentVisibleCardsMachinePLayer();\r\n            gridPaneCardsMachine.getChildren().clear();\r\n            for (int i = 0; i < currentVisibleCardsMachinePlayer.length; i++){\r\n                Card card = currentVisibleCardsMachinePlayer[i];\r\n                ImageView cardImageView = card.getCard();\r\n\r\n                gridPaneCardsMachine.add(cardImageView, i , 0);\r\n\r\n                machineCardsLabel.setText(\"Cartas de la máquina: \" + machinePlayer.getCardsPlayer().size());\r\n            }\r\n    }\r\n\r\n    public boolean isCardPosible(Card card, Table table){\r\n        return Objects.equals(table.getCurrentColor(), card.getColor())\r\n                || Objects.equals(table.getCurrentNum(), card.getValue())\r\n                || Objects.equals(card.getValue(), \"WILD\")\r\n                || Objects.equals(card.getValue(), \"FOUR\");\r\n    }\r\n\r\n    public void handleCardAction(Player targetPlayer, Card card) throws Exception {\r\n        switch (card.getValue()) {\r\n            case \"FOUR\":\r\n                gameUno.eatCard(targetPlayer, 4);\r\n                pieAnchorPane.setVisible(true);\r\n                tableImageView.setVisible(false);\r\n                showUpMessage(\"+4\");\r\n                if (targetPlayer == humanPlayer){\r\n                    printCardsHumanPlayer();\r\n                    handleMachineColorSelection();\r\n                } else {\r\n                    printCardsMachinePlayer();\r\n                }\r\n                break;\r\n            case \"TWO\":\r\n                gameUno.eatCard(targetPlayer, 2);\r\n                if (targetPlayer == humanPlayer){\r\n                    printCardsHumanPlayer();\r\n                } else {\r\n                    printCardsMachinePlayer();\r\n                }\r\n                break;\r\n            case \"WILD\":\r\n                pieAnchorPane.setVisible(true);\r\n                tableImageView.setVisible(false);\r\n                showUpMessage(\"+2\");\r\n                if (targetPlayer == humanPlayer){ handleMachineColorSelection(); }\r\n            case \"SKIP\":\r\n                showUpMessage(\"TURNO SALTADO\");\r\n                nextTurn();\r\n                break;\r\n            case \"REVERSE\":\r\n                showUpMessage(\"SENTIDO CAMBIADO\");\r\n                nextTurn();\r\n                break;\r\n            default:\r\n                System.out.println(\"La carta no tiene ninguna característica\");\r\n                break;\r\n        }\r\n        checkNumberCards(machinePlayer.getCardsPlayer().size(), machinePlayer.getTypePlayer());\r\n    }\r\n\r\n    /**\r\n     * Finds the position of a specific card in the human player's hand.\r\n     *\r\n     * @param card the card to find\r\n     * @return the position of the card, or -1 if not found\r\n     */\r\n    public Integer findPosCardsHumanPlayer(Card card) {\r\n        for (int i = 0; i < this.humanPlayer.getCardsPlayer().size(); i++) {\r\n            if (this.humanPlayer.getCardsPlayer().get(i).equals(card)) {\r\n                return i;\r\n            }\r\n        }\r\n        return -1;\r\n    }\r\n\r\n    private void handleMachineColorSelection(){\r\n        Random rand = new Random();\r\n        int num = rand.nextInt(4);\r\n        switch (num){\r\n            case 0:\r\n                setBlueColor();\r\n                break;\r\n            case 1:\r\n                setRedColor();\r\n                break;\r\n            case 2:\r\n                setYellowColor();\r\n                break;\r\n            case 3:\r\n                setGreenColor();\r\n                break;\r\n        }\r\n    }\r\n\r\n    @FXML\r\n    private void setBlueColor(){\r\n        if (table.getCurrentCardOnTheTable().getValue() == \"WILD\"){\r\n            tableImageView.setImage(new Image(getClass().getResource(\"/org/example/eiscuno/cards-uno/BLUE_wild.png\").toExternalForm()));\r\n        } else{\r\n            tableImageView.setImage(new Image(getClass().getResource(\"/org/example/eiscuno/cards-uno/BLUE_4_wild_draw.png\").toExternalForm()));\r\n        }\r\n        this.table.setCurrentColor(\"BLUE\");\r\n        this.pieAnchorPane.setVisible(false);\r\n        tableImageView.setVisible(true);\r\n    }\r\n\r\n    @FXML\r\n    private void setRedColor(){\r\n        if (table.getCurrentCardOnTheTable().getValue() == \"WILD\"){\r\n            tableImageView.setImage(new Image(getClass().getResource(\"/org/example/eiscuno/cards-uno/RED_wild.png\").toExternalForm()));\r\n        } else{\r\n            tableImageView.setImage(new Image(getClass().getResource(\"/org/example/eiscuno/cards-uno/RED_4_wild_draw.png\").toExternalForm()));\r\n        }\r\n        this.table.setCurrentColor(\"RED\");\r\n        this.pieAnchorPane.setVisible(false);\r\n        tableImageView.setVisible(true);\r\n    }\r\n\r\n    @FXML\r\n    private void setYellowColor(){\r\n        if (table.getCurrentCardOnTheTable().getValue() == \"WILD\"){\r\n            tableImageView.setImage(new Image(getClass().getResource(\"/org/example/eiscuno/cards-uno/YELLOW_wild.png\").toExternalForm()));\r\n        } else{\r\n            tableImageView.setImage(new Image(getClass().getResource(\"/org/example/eiscuno/cards-uno/YELLOW_4_wild_draw.png\").toExternalForm()));\r\n        }\r\n        this.table.setCurrentColor(\"YELLOW\");\r\n        this.pieAnchorPane.setVisible(false);\r\n        tableImageView.setVisible(true);\r\n    }\r\n\r\n    @FXML\r\n    private void setGreenColor(){\r\n        if (table.getCurrentCardOnTheTable().getValue() == \"WILD\"){\r\n            tableImageView.setImage(new Image(getClass().getResource(\"/org/example/eiscuno/cards-uno/GREEN_wild.png\").toExternalForm()));\r\n        } else{\r\n            tableImageView.setImage(new Image(getClass().getResource(\"/org/example/eiscuno/cards-uno/GREEN_4_wild_draw.png\").toExternalForm()));\r\n        }\r\n        this.table.setCurrentColor(\"GREEN\");\r\n        this.pieAnchorPane.setVisible(false);\r\n        tableImageView.setVisible(true);\r\n    }\r\n\r\n    public void nextTurn(){\r\n        this.currentTurn = this.currentTurn == 0 ? 1 : 0;\r\n    }\r\n\r\n    public int getCurrentTurn(){\r\n        return this.currentTurn;\r\n    }\r\n\r\n    /**\r\n     * Handles the \"Back\" button action to show the previous set of cards.\r\n     *\r\n     * @param event the action event\r\n     */\r\n    @FXML\r\n    void onHandleBack(ActionEvent event) {\r\n        if (this.posInitCardToShow > 0) {\r\n            this.posInitCardToShow--;\r\n            printCardsHumanPlayer();\r\n        }\r\n    }\r\n\r\n    /**\r\n     * Handles the \"Next\" button action to show the next set of cards.\r\n     *\r\n     * @param event the action event\r\n     */\r\n    @FXML\r\n    void onHandleNext(ActionEvent event) {\r\n        if (this.posInitCardToShow < this.humanPlayer.getCardsPlayer().size() - 4) {\r\n            this.posInitCardToShow++;\r\n            printCardsHumanPlayer();\r\n        }\r\n    }\r\n\r\n    @FXML\r\n    void onHandleTakeCard() {\r\n        gameUno.eatCard(humanPlayer, 1);\r\n        setDisableButton(true);\r\n        if (this.posInitCardToShow < this.humanPlayer.getCardsPlayer().size() - 4) {\r\n            posInitCardToShow = humanPlayer.getCardsPlayer().size() - 4;\r\n        }\r\n        printCardsHumanPlayer();\r\n    }\r\n\r\n    /**\r\n     * Handles the action of saying \"Uno\".\r\n     *\r\n     * @param event the action event\r\n     */\r\n    @FXML\r\n    void onHandleUno(ActionEvent event) {\r\n        threadSingUNOMachine.setButtonUNOPressed(true);\r\n        showAdviseUnoTemporarily(adviseUnoPlayer);\r\n    }\r\n\r\n    /**\r\n     * Updates visible cards in the player's hand\r\n     */\r\n    public void updateVisibleCardsHumanPlayer() {\r\n        printCardsHumanPlayer();\r\n    }\r\n\r\n    public void checkNumberCards(int numberCards, String typePlayer) throws Exception{\r\n        if(numberCards == 1){\r\n            if(Objects.equals(typePlayer, \"HUMAN_PLAYER\")){\r\n                setDisableButton(false);\r\n                threadSingUNOMachine.setRunning(true);\r\n                threadSingUNOMachine.setButtonUNOPressed(false);\r\n            }\r\n            else{\r\n                showAdviseUnoTemporarily(adviseUnoMachine);\r\n            }\r\n        }\r\n        else if(numberCards == 0){\r\n            GameUnoStage.closeInstance();\r\n            if(Objects.equals(typePlayer, \"HUMAN_PLAYER\")){\r\n                WinStage.getInstance();\r\n            }\r\n            else{\r\n                LoseStage.getInstance();\r\n            }\r\n        }\r\n    }\r\n\r\n    public void setDisableButton(boolean disable){\r\n        buttonUNO.setDisable(disable);\r\n    }\r\n\r\n    private void showAdviseUnoTemporarily(ImageView adviseUno) {\r\n        adviseUno.setVisible(true);\r\n        Timeline timeline = new Timeline(new KeyFrame(\r\n                Duration.seconds(3),\r\n                event -> adviseUno.setVisible(false)\r\n        ));\r\n        timeline.setCycleCount(1);\r\n        timeline.play(); // Start animation\r\n    }\r\n\r\n    public void discardCard(Card card) {\r\n        animateCardDiscard(card);\r\n    }\r\n\r\n    private void animateCardDiscard(Card card) {\r\n        ImageView cardImageView = card.getCard();\r\n        cardImageView.setOpacity(1);\r\n        tableImageView.setImage(card.getImage());\r\n\r\n        TranslateTransition translate = new TranslateTransition(Duration.seconds(0.5), cardImageView);\r\n        translate.setFromX(tableImageView.getLayoutX());\r\n        translate.setFromY(tableImageView.getLayoutY());\r\n        translate.setToX(tableImageView.getLayoutX() + 50);\r\n        translate.setToY(tableImageView.getLayoutY() + 50);\r\n        translate.play();\r\n    }\r\n\r\n    private void animateCardDeal(Card card, GridPane gridPane, int position) {\r\n        ImageView cardImageView = card.getCard();\r\n        cardImageView.setOpacity(0);\r\n        gridPane.add(cardImageView, position, 0);\r\n\r\n        FadeTransition fadeIn = new FadeTransition(Duration.seconds(0.5), cardImageView);\r\n        fadeIn.setFromValue(0);\r\n        fadeIn.setToValue(1);\r\n        fadeIn.setDelay(Duration.seconds(position * 0.2)); // Retraso para cada carta\r\n        fadeIn.play();\r\n    }\r\n\r\n    private void showUpMessage(String message){\r\n        Label messageLabel = new Label();\r\n        messageLabel.setAlignment(Pos.CENTER);\r\n        messageLabel.setText(message);\r\n    }\r\n\r\n    public ThreadPlayMachine getThreadPlayMachine(){ return threadPlayMachine; }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/org/example/eiscuno/controller/GameUnoController.java b/src/main/java/org/example/eiscuno/controller/GameUnoController.java
+--- a/src/main/java/org/example/eiscuno/controller/GameUnoController.java	(revision 7e5fb679fdafef36b4e0d5b12a8ba1c7f662d8f1)
++++ b/src/main/java/org/example/eiscuno/controller/GameUnoController.java	(date 1734333012517)
+@@ -1,8 +1,7 @@
+ package org.example.eiscuno.controller;
+ 
+-import javafx.animation.PauseTransition;
+-import javafx.animation.KeyFrame;
+-import javafx.animation.Timeline;
++import javafx.animation.*;
++import javafx.application.Platform;
+ import javafx.event.ActionEvent;
+ import javafx.fxml.FXML;
+ import javafx.geometry.Pos;
+@@ -25,11 +24,10 @@
+ import org.example.eiscuno.model.machine.ThreadPlayMachine;
+ import org.example.eiscuno.model.player.Player;
+ import org.example.eiscuno.model.table.Table;
+-import javafx.animation.FadeTransition;
+-import javafx.animation.TranslateTransition;
+ import org.example.eiscuno.view.GameUnoStage;
+ import org.example.eiscuno.view.LoseStage;
+ import org.example.eiscuno.view.WinStage;
++import javafx.util.Duration;
+ 
+ import javax.swing.*;
+ import java.io.IOException;
+@@ -91,8 +89,8 @@
+      * Initializes the variables for the game.
+      */
+     private void initVariables() {
+-        this.humanPlayer = new Player("HUMAN_PLAYER");
+-        this.machinePlayer = new Player("MACHINE_PLAYER");
++        this.humanPlayer = new Player("HUMAN_PLAYER",400,10.39);
++        this.machinePlayer = new Player("MACHINE_PLAYER",250,10.39);
+         this.deck = new Deck();
+         this.table = new Table();
+         this.gameUno = new GameUno(this.humanPlayer, this.machinePlayer, this.deck, this.table);
+@@ -208,7 +206,7 @@
+                 }
+                 break;
+             case "TWO":
+-                gameUno.eatCard(targetPlayer, 2);
++                handleDrawTwoCard(targetPlayer); // Llamar al nuevo metodo para manejar la carta +2
+                 if (targetPlayer == humanPlayer){
+                     printCardsHumanPlayer();
+                 } else {
+@@ -235,6 +233,63 @@
+         checkNumberCards(machinePlayer.getCardsPlayer().size(), machinePlayer.getTypePlayer());
+     }
+ 
++    // Método para manejar la carta +2
++    public void handleDrawTwoCard(Player targetPlayer) {
++        // Animación de la carta +2 volando hacia el jugador que recibe la penalización
++        animateDrawTwoCard(targetPlayer);
++
++
++            Card newCard = gameUno.getDeck().takeCard();
++            // Usar la imagen genérica para la máquina
++            newCard.setImagePath("/org/example/eiscuno/cards-uno/card_uno.png");
++            targetPlayer.addCard(newCard); // Agregar la carta a la mano del jugador
++
++
++        // Actualizar la visualización de cartas después de agregar
++        if (targetPlayer.getTypePlayer().equals("HUMAN_PLAYER")) {
++            printCardsHumanPlayer();
++        } else {
++            printCardsMachinePlayer();
++        }
++    }
++
++    // Método para manejar la acción de jugar la carta +2
++    public void playCard(Card card) {
++        if (card.getValue().equals("TWO")) {
++            handleDrawTwoCard(getOpponentPlayer());
++        } else {
++            this.table.addCardOnTheTable(card);
++        }
++    }
++
++    // Método para obtener el jugador oponente
++    private Player getOpponentPlayer() {
++        return (currentTurn == 0) ? gameUno.getMachinePlayer() : gameUno.getHumanPlayer();
++    }
++    // Método para animar la carta +2 volando hacia el jugador
++    private void animateDrawTwoCard(Player targetPlayer) {
++        // Crear el ImageView con la ruta correspondiente
++        ImageView drawTwoCardImageView = new ImageView(new Image(getClass().getResource("/org/example/eiscuno/cards-uno/card_uno.png").toExternalForm()));
++        drawTwoCardImageView.setOpacity(1);
++
++        // Usar Platform.runLater para asegurarse de que se ejecute en el hilo de la aplicación
++        Platform.runLater(() -> {
++            // Obtener la raíz de la escena y agregar el ImageView
++            Pane root = (Pane) tableImageView.getScene().getRoot();
++            root.getChildren().add(drawTwoCardImageView); // Añadir la carta a la escena
++
++            TranslateTransition translate = new TranslateTransition(Duration.seconds(1), drawTwoCardImageView);
++            translate.setFromX(tableImageView.getLayoutX());
++            translate.setFromY(tableImageView.getLayoutY());
++            translate.setToX(targetPlayer.getPositionX()); // Asegúrate de que este método esté implementado
++            translate.setToY(targetPlayer.getPositionY());
++            translate.setOnFinished(event -> {
++                drawTwoCardImageView.setOpacity(0); // Hacer invisible la carta después de la animación
++                root.getChildren().remove(drawTwoCardImageView); // Eliminar la carta de la interfaz
++            });
++            translate.play();
++        });
++    }
+     /**
+      * Finds the position of a specific card in the human player's hand.
+      *
+Index: src/main/java/org/example/eiscuno/model/card/Card.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package org.example.eiscuno.model.card;\r\n\r\nimport javafx.scene.image.Image;\r\nimport javafx.scene.image.ImageView;\r\n\r\n/**\r\n * Represents a card in the Uno game.\r\n */\r\npublic class Card {\r\n    private String url;\r\n    private String value;\r\n    private String color;\r\n    private Image image;\r\n    private ImageView cardImageView;\r\n\r\n    /**\r\n     * Constructs a Card with the specified image URL and name.\r\n     *\r\n     * @param url the URL of the card image\r\n     * @param value of the card\r\n     */\r\n    public Card(String url, String value, String color) {\r\n        this.url = url;\r\n        this.value = value;\r\n        this.color = color;\r\n        this.image = new Image(String.valueOf(getClass().getResource(url)));\r\n        this.cardImageView = createCardImageView();\r\n    }\r\n\r\n    /**\r\n     * Creates and configures the ImageView for the card.\r\n     *\r\n     * @return the configured ImageView of the card\r\n     */\r\n    private ImageView createCardImageView() {\r\n        ImageView card = new ImageView(this.image);\r\n        card.setY(16);\r\n        card.setFitHeight(90);\r\n        card.setFitWidth(70);\r\n        return card;\r\n    }\r\n\r\n    /**\r\n     * Gets the ImageView representation of the card.\r\n     *\r\n     * @return the ImageView of the card\r\n     */\r\n    public ImageView getCard() {\r\n        return cardImageView;\r\n    }\r\n\r\n    /**\r\n     * Gets the image of the card.\r\n     *\r\n     * @return the Image of the card\r\n     */\r\n    public Image getImage() {\r\n        return image;\r\n    }\r\n\r\n    public String getValue() {\r\n        return value;\r\n    }\r\n\r\n    public String getColor() {\r\n        return color;\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/org/example/eiscuno/model/card/Card.java b/src/main/java/org/example/eiscuno/model/card/Card.java
+--- a/src/main/java/org/example/eiscuno/model/card/Card.java	(revision 7e5fb679fdafef36b4e0d5b12a8ba1c7f662d8f1)
++++ b/src/main/java/org/example/eiscuno/model/card/Card.java	(date 1734333012518)
+@@ -40,6 +40,12 @@
+         return card;
+     }
+ 
++    public void setImagePath(String url) {
++        this.url = url;
++        this.image = new Image(String.valueOf(getClass().getResource(url)));
++        this.cardImageView.setImage(this.image); // Actualiza la imagen en el ImageView
++    }
++
+     /**
+      * Gets the ImageView representation of the card.
+      *
+Index: .idea/workspace.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"AutoImportSettings\">\r\n    <option name=\"autoReloadType\" value=\"SELECTIVE\" />\r\n  </component>\r\n  <component name=\"ChangeListManager\">\r\n    <list default=\"true\" id=\"1ee8ff40-bbdd-4aec-a3d2-cf5cc45130ec\" name=\"Changes\" comment=\"\">\r\n      <change beforePath=\"$PROJECT_DIR$/.idea/workspace.xml\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/.idea/workspace.xml\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/resources/org/example/eiscuno/fxml/lose-view.fxml\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/resources/org/example/eiscuno/fxml/lose-view.fxml\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/resources/org/example/eiscuno/fxml/win-view.fxml\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/resources/org/example/eiscuno/fxml/win-view.fxml\" afterDir=\"false\" />\r\n    </list>\r\n    <option name=\"SHOW_DIALOG\" value=\"false\" />\r\n    <option name=\"HIGHLIGHT_CONFLICTS\" value=\"true\" />\r\n    <option name=\"HIGHLIGHT_NON_ACTIVE_CHANGELIST\" value=\"false\" />\r\n    <option name=\"LAST_RESOLUTION\" value=\"IGNORE\" />\r\n  </component>\r\n  <component name=\"FileTemplateManagerImpl\">\r\n    <option name=\"RECENT_TEMPLATES\">\r\n      <list>\r\n        <option value=\"JavaFXApplication\" />\r\n        <option value=\"Enum\" />\r\n        <option value=\"CSS File\" />\r\n        <option value=\"Interface\" />\r\n        <option value=\"Class\" />\r\n      </list>\r\n    </option>\r\n  </component>\r\n  <component name=\"Git.Settings\">\r\n    <excluded-from-favorite>\r\n      <branch-storage>\r\n        <map>\r\n          <entry type=\"REMOTE\">\r\n            <value>\r\n              <list>\r\n                <branch-info repo=\"$PROJECT_DIR$\" source=\"origin/master\" />\r\n              </list>\r\n            </value>\r\n          </entry>\r\n        </map>\r\n      </branch-storage>\r\n    </excluded-from-favorite>\r\n    <option name=\"RECENT_BRANCH_BY_REPOSITORY\">\r\n      <map>\r\n        <entry key=\"$PROJECT_DIR$\" value=\"jssc\" />\r\n      </map>\r\n    </option>\r\n    <option name=\"RECENT_GIT_ROOT_PATH\" value=\"$PROJECT_DIR$\" />\r\n  </component>\r\n  <component name=\"GitHubPullRequestSearchHistory\">{\r\n  &quot;lastFilter&quot;: {\r\n    &quot;state&quot;: &quot;OPEN&quot;,\r\n    &quot;assignee&quot;: &quot;fabiansvc&quot;\r\n  }\r\n}</component>\r\n  <component name=\"GithubPullRequestsUISettings\">{\r\n  &quot;selectedUrlAndAccountId&quot;: {\r\n    &quot;url&quot;: &quot;https://github.com/Sebas0625/MiniProject4.git&quot;,\r\n    &quot;accountId&quot;: &quot;e47ce93a-d7bf-47e1-ba95-649dbf789ad3&quot;\r\n  }\r\n}</component>\r\n  <component name=\"MavenImportPreferences\">\r\n    <option name=\"generalSettings\">\r\n      <MavenGeneralSettings>\r\n        <option name=\"mavenHomeTypeForPersistence\" value=\"WRAPPER\" />\r\n      </MavenGeneralSettings>\r\n    </option>\r\n  </component>\r\n  <component name=\"ProjectColorInfo\">{\r\n  &quot;associatedIndex&quot;: 4\r\n}</component>\r\n  <component name=\"ProjectId\" id=\"2h51MgXC3VsYGUopaGajj22IER5\" />\r\n  <component name=\"ProjectLevelVcsManager\" settingsEditedManually=\"true\" />\r\n  <component name=\"ProjectViewState\">\r\n    <option name=\"hideEmptyMiddlePackages\" value=\"true\" />\r\n    <option name=\"showLibraryContents\" value=\"true\" />\r\n  </component>\r\n  <component name=\"PropertiesComponent\">{\r\n  &quot;keyToString&quot;: {\r\n    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,\r\n    &quot;Application.HelloApplication.executor&quot;: &quot;Run&quot;,\r\n    &quot;Application.Main.executor&quot;: &quot;Run&quot;,\r\n    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,\r\n    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,\r\n    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,\r\n    &quot;git-widget-placeholder&quot;: &quot;matc&quot;,\r\n    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,\r\n    &quot;last_opened_file_path&quot;: &quot;C:/Users/MAYCOL/Documents/Tercer Semestre Univalle/POE/MiniProject4/src/main/resources/org/example/eiscuno/images&quot;,\r\n    &quot;list.type.of.created.stylesheet&quot;: &quot;CSS&quot;,\r\n    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,\r\n    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,\r\n    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,\r\n    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,\r\n    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,\r\n    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,\r\n    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,\r\n    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;,\r\n    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;,\r\n    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;\r\n  }\r\n}</component>\r\n  <component name=\"RecentsManager\">\r\n    <key name=\"CopyFile.RECENT_KEYS\">\r\n      <recent name=\"C:\\Users\\MAYCOL\\Documents\\Tercer Semestre Univalle\\POE\\MiniProject4\\src\\main\\resources\\org\\example\\eiscuno\\images\" />\r\n      <recent name=\"C:\\Users\\User\\OneDrive\\Escritorio\\Universidad\\Semestre 3\\Proyectos-POE\\Mini Proyecto 4\\src\\main\\java\\org\\example\\eiscuno\\model\" />\r\n    </key>\r\n    <key name=\"MoveFile.RECENT_KEYS\">\r\n      <recent name=\"C:\\Users\\sebas\\OneDrive\\Desktop\\Proyectos-POE\\MiniProject4\\src\\main\\resources\\org\\example\\eiscuno\\images\" />\r\n      <recent name=\"C:\\Users\\User\\OneDrive\\Escritorio\\Universidad\\Semestre 3\\Proyectos-POE\\Mini Proyecto 4\\src\\main\\resources\\org\\example\\eiscuno\\fxml\" />\r\n      <recent name=\"C:\\Users\\User\\OneDrive\\Escritorio\\Universidad\\Semestre 3\\Proyectos-POE\\Mini Proyecto 4\\src\\main\\resources\\org\\example\\eiscuno\" />\r\n      <recent name=\"C:\\Users\\fsvc1\\Coding\\eisc-uno\\src\\main\\resources\\org\\example\\eiscuno\" />\r\n      <recent name=\"C:\\Users\\fsvc1\\Coding\\eisc-uno\\src\\main\\resources\\org\\example\\eiscuno\\images\" />\r\n    </key>\r\n  </component>\r\n  <component name=\"RunManager\">\r\n    <configuration name=\"Main\" type=\"Application\" factoryName=\"Application\" temporary=\"true\" nameIsGenerated=\"true\">\r\n      <option name=\"MAIN_CLASS_NAME\" value=\"org.example.eiscuno.Main\" />\r\n      <module name=\"eisc-uno\" />\r\n      <extension name=\"coverage\">\r\n        <pattern>\r\n          <option name=\"PATTERN\" value=\"org.example.eiscuno.*\" />\r\n          <option name=\"ENABLED\" value=\"true\" />\r\n        </pattern>\r\n      </extension>\r\n      <method v=\"2\">\r\n        <option name=\"Make\" enabled=\"true\" />\r\n      </method>\r\n    </configuration>\r\n    <recent_temporary>\r\n      <list>\r\n        <item itemvalue=\"Application.Main\" />\r\n      </list>\r\n    </recent_temporary>\r\n  </component>\r\n  <component name=\"SharedIndexes\">\r\n    <attachedChunks>\r\n      <set>\r\n        <option value=\"bundled-jdk-9823dce3aa75-b114ca120d71-intellij.indexing.shared.core-IU-242.21829.142\" />\r\n        <option value=\"bundled-js-predefined-d6986cc7102b-7c0b70fcd90d-JavaScript-IU-242.21829.142\" />\r\n      </set>\r\n    </attachedChunks>\r\n  </component>\r\n  <component name=\"SpellCheckerSettings\" RuntimeDictionaries=\"0\" Folders=\"0\" CustomDictionaries=\"0\" DefaultDictionary=\"application-level\" UseSingleDictionary=\"true\" transferred=\"true\" />\r\n  <component name=\"TaskManager\">\r\n    <task active=\"true\" id=\"Default\" summary=\"Default task\">\r\n      <changelist id=\"1ee8ff40-bbdd-4aec-a3d2-cf5cc45130ec\" name=\"Changes\" comment=\"\" />\r\n      <created>1716869079895</created>\r\n      <option name=\"number\" value=\"Default\" />\r\n      <option name=\"presentableId\" value=\"Default\" />\r\n      <updated>1716869079895</updated>\r\n      <workItem from=\"1716869081101\" duration=\"1989000\" />\r\n      <workItem from=\"1716937216117\" duration=\"1202000\" />\r\n      <workItem from=\"1716949345992\" duration=\"5490000\" />\r\n      <workItem from=\"1717004194707\" duration=\"3656000\" />\r\n      <workItem from=\"1717077374234\" duration=\"23000\" />\r\n      <workItem from=\"1717100685009\" duration=\"1547000\" />\r\n      <workItem from=\"1717179969295\" duration=\"1262000\" />\r\n      <workItem from=\"1717188401940\" duration=\"5723000\" />\r\n      <workItem from=\"1717248020885\" duration=\"2071000\" />\r\n      <workItem from=\"1717294616252\" duration=\"3767000\" />\r\n      <workItem from=\"1717380082805\" duration=\"84000\" />\r\n      <workItem from=\"1717445468019\" duration=\"129000\" />\r\n      <workItem from=\"1717445697650\" duration=\"964000\" />\r\n      <workItem from=\"1717456780718\" duration=\"9929000\" />\r\n      <workItem from=\"1717624873426\" duration=\"617000\" />\r\n      <workItem from=\"1717648324316\" duration=\"1349000\" />\r\n      <workItem from=\"1717701834429\" duration=\"18000\" />\r\n      <workItem from=\"1717704199858\" duration=\"6785000\" />\r\n      <workItem from=\"1717852871006\" duration=\"31000\" />\r\n      <workItem from=\"1717853787588\" duration=\"7091000\" />\r\n      <workItem from=\"1732204398035\" duration=\"285000\" />\r\n      <workItem from=\"1734184359249\" duration=\"12050000\" />\r\n      <workItem from=\"1734214265472\" duration=\"68000\" />\r\n      <workItem from=\"1734231537789\" duration=\"3829000\" />\r\n      <workItem from=\"1734295466845\" duration=\"2122000\" />\r\n    </task>\r\n    <servers />\r\n  </component>\r\n  <component name=\"TypeScriptGeneratedFilesManager\">\r\n    <option name=\"version\" value=\"3\" />\r\n  </component>\r\n  <component name=\"XDebuggerManager\">\r\n    <pin-to-top-manager>\r\n      <pinned-members>\r\n        <PinnedItemInfo parentTag=\"org.example.eiscuno.controller.GameUnoController\" memberName=\"currentTurn\" />\r\n      </pinned-members>\r\n    </pin-to-top-manager>\r\n    <watches-manager>\r\n      <configuration name=\"Application\">\r\n        <watch expression=\"((ThreadPlayMachine)this).currentVisibleCardsMachine\" custom=\"org.example.eiscuno.model.machine.ThreadPlayMachine\" />\r\n        <watch expression=\"gameUnoController\" />\r\n      </configuration>\r\n    </watches-manager>\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/workspace.xml b/.idea/workspace.xml
+--- a/.idea/workspace.xml	(revision 7e5fb679fdafef36b4e0d5b12a8ba1c7f662d8f1)
++++ b/.idea/workspace.xml	(date 1734333012516)
+@@ -6,8 +6,9 @@
+   <component name="ChangeListManager">
+     <list default="true" id="1ee8ff40-bbdd-4aec-a3d2-cf5cc45130ec" name="Changes" comment="">
+       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/resources/org/example/eiscuno/fxml/lose-view.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/org/example/eiscuno/fxml/lose-view.fxml" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/resources/org/example/eiscuno/fxml/win-view.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/org/example/eiscuno/fxml/win-view.fxml" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/eiscuno/controller/GameUnoController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/eiscuno/controller/GameUnoController.java" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/eiscuno/model/card/Card.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/eiscuno/model/card/Card.java" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/eiscuno/model/player/Player.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/eiscuno/model/player/Player.java" afterDir="false" />
+     </list>
+     <option name="SHOW_DIALOG" value="false" />
+     <option name="HIGHLIGHT_CONFLICTS" value="true" />
+@@ -74,30 +75,30 @@
+     <option name="hideEmptyMiddlePackages" value="true" />
+     <option name="showLibraryContents" value="true" />
+   </component>
+-  <component name="PropertiesComponent">{
+-  &quot;keyToString&quot;: {
+-    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
+-    &quot;Application.HelloApplication.executor&quot;: &quot;Run&quot;,
+-    &quot;Application.Main.executor&quot;: &quot;Run&quot;,
+-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+-    &quot;git-widget-placeholder&quot;: &quot;matc&quot;,
+-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+-    &quot;last_opened_file_path&quot;: &quot;C:/Users/MAYCOL/Documents/Tercer Semestre Univalle/POE/MiniProject4/src/main/resources/org/example/eiscuno/images&quot;,
+-    &quot;list.type.of.created.stylesheet&quot;: &quot;CSS&quot;,
+-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+-    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
+-    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
+-    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;,
+-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;,
+-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
++  <component name="PropertiesComponent"><![CDATA[{
++  "keyToString": {
++    "ASKED_ADD_EXTERNAL_FILES": "true",
++    "Application.HelloApplication.executor": "Run",
++    "Application.Main.executor": "Run",
++    "RunOnceActivity.OpenProjectViewOnStart": "true",
++    "RunOnceActivity.ShowReadmeOnStart": "true",
++    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
++    "git-widget-placeholder": "vas",
++    "kotlin-language-version-configured": "true",
++    "last_opened_file_path": "C:/Users/MAYCOL/Documents/Tercer Semestre Univalle/POE/MiniProject4/src/main/resources/org/example/eiscuno/images",
++    "list.type.of.created.stylesheet": "CSS",
++    "node.js.detected.package.eslint": "true",
++    "node.js.detected.package.tslint": "true",
++    "node.js.selected.package.eslint": "(autodetect)",
++    "node.js.selected.package.tslint": "(autodetect)",
++    "nodejs_package_manager_path": "npm",
++    "project.structure.last.edited": "Project",
++    "project.structure.proportion": "0.15",
++    "project.structure.side.proportion": "0.0",
++    "settings.editor.selected.configurable": "preferences.lookFeel",
++    "vue.rearranger.settings.migration": "true"
+   }
+-}</component>
++}]]></component>
+   <component name="RecentsManager">
+     <key name="CopyFile.RECENT_KEYS">
+       <recent name="C:\Users\MAYCOL\Documents\Tercer Semestre Univalle\POE\MiniProject4\src\main\resources\org\example\eiscuno\images" />
+Index: src/main/java/org/example/eiscuno/model/player/Player.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package org.example.eiscuno.model.player;\r\n\r\nimport org.example.eiscuno.model.card.Card;\r\n\r\nimport java.util.ArrayList;\r\n\r\n/**\r\n * Represents a player in the Uno game.\r\n */\r\npublic class Player implements IPlayer {\r\n    private ArrayList<Card> cardsPlayer;\r\n    private String typePlayer;\r\n\r\n    /**\r\n     * Constructs a new Player object with an empty hand of cards.\r\n     */\r\n    public Player(String typePlayer){\r\n        this.cardsPlayer = new ArrayList<Card>();\r\n        this.typePlayer = typePlayer;\r\n    };\r\n\r\n    /**\r\n     * Adds a card to the player's hand.\r\n     *\r\n     * @param card The card to be added to the player's hand.\r\n     */\r\n    @Override\r\n    public void addCard(Card card){\r\n        cardsPlayer.add(card);\r\n    }\r\n\r\n    /**\r\n     * Retrieves all cards currently held by the player.\r\n     *\r\n     * @return An ArrayList containing all cards in the player's hand.\r\n     */\r\n    @Override\r\n    public ArrayList<Card> getCardsPlayer() {\r\n        return cardsPlayer;\r\n    }\r\n\r\n    /**\r\n     * Removes a card from the player's hand based on its index.\r\n     *\r\n     * @param index The index of the card to remove.\r\n     */\r\n    @Override\r\n    public void removeCard(int index) {\r\n        cardsPlayer.remove(index);\r\n    }\r\n\r\n    /**\r\n     * Retrieves a card from the player's hand based on its index.\r\n     *\r\n     * @param index The index of the card to retrieve.\r\n     * @return The card at the specified index in the player's hand.\r\n     */\r\n    @Override\r\n    public Card getCard(int index){\r\n        return cardsPlayer.get(index);\r\n    }\r\n\r\n    public String getTypePlayer() {\r\n        return typePlayer;\r\n    }\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/org/example/eiscuno/model/player/Player.java b/src/main/java/org/example/eiscuno/model/player/Player.java
+--- a/src/main/java/org/example/eiscuno/model/player/Player.java	(revision 7e5fb679fdafef36b4e0d5b12a8ba1c7f662d8f1)
++++ b/src/main/java/org/example/eiscuno/model/player/Player.java	(date 1734333012519)
+@@ -10,14 +10,26 @@
+ public class Player implements IPlayer {
+     private ArrayList<Card> cardsPlayer;
+     private String typePlayer;
++    private double positionX; // Posición en el eje X
++    private double positionY; // Posición en el eje Y
+ 
+     /**
+      * Constructs a new Player object with an empty hand of cards.
+      */
+-    public Player(String typePlayer){
++    public Player(String typePlayer, double positionX, double positionY){
+         this.cardsPlayer = new ArrayList<Card>();
+         this.typePlayer = typePlayer;
++        this.positionX = positionX; // Inicializar posición
++        this.positionY = positionY; // Inicializar posición
+     };
++
++    public double getPositionX() {
++        return positionX; // Retornar posición X
++    }
++
++    public double getPositionY() {
++        return positionY; // Retornar posición Y
++    }
+ 
+     /**
+      * Adds a card to the player's hand.
