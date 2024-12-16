@@ -10,10 +10,11 @@ import org.example.eiscuno.model.player.Player;
 import java.util.ArrayList;
 
 public class ThreadSingUNOMachine implements Runnable {
-    private GameUno gameUno;
-    private GameUnoController gameUnoController;
+    private final GameUno gameUno;
+    private final GameUnoController gameUnoController;
     private volatile boolean running = false;
-    boolean buttonUNOPressed = false;
+    private boolean buttonUNOPressed = false;
+    private int currentTurn;
 
     public ThreadSingUNOMachine(GameUno gameUno, GameUnoController gameUnoController) {
         this.gameUno = gameUno;
@@ -30,18 +31,42 @@ public class ThreadSingUNOMachine implements Runnable {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                if(!buttonUNOPressed){
-                    hasOneCardTheHumanPlayer();
-                }
+
+                checkUno();
+
+                Platform.runLater(() -> gameUnoController.setDisableUnoButton(true));
+
                 running = false;
             }
         }
     }
 
-    private void hasOneCardTheHumanPlayer(){
-        gameUno.haveSungOne("MACHINE_PLAYER");
-        Platform.runLater(() -> gameUnoController.updateVisibleCardsHumanPlayer());
-        Platform.runLater(() -> gameUnoController.setDisableButton(true));
+    public void checkUno(){
+        if (currentTurn == 0){
+            if (buttonUNOPressed){
+                System.out.println("HAS CANTADO UNO");
+                Platform.runLater(() -> gameUnoController.showAdviseUnoTemporarily(0));
+            } else {
+                System.out.println("La máquina ha cantado uno primero");
+                gameUno.hasSungOne("MACHINE_PLAYER");
+                Platform.runLater(() -> {
+                    gameUnoController.printCardsHumanPlayer();
+                    gameUnoController.showAdviseUnoTemporarily(1);
+                });
+            }
+        } else if (currentTurn == 1) {
+            if (buttonUNOPressed) {
+                System.out.println("HAS CANTADO UNO");
+                gameUno.hasSungOne("HUMAN_PLAYER");
+                Platform.runLater(() -> {
+                    gameUnoController.printCardsMachinePlayer();
+                    gameUnoController.showAdviseUnoTemporarily(0);
+                });
+            } else {
+                System.out.println("La máquina ha cantado uno primero");
+                Platform.runLater(() -> gameUnoController.showAdviseUnoTemporarily(1));
+            }
+        }
     }
 
     public void setRunning(boolean running) {
@@ -50,4 +75,5 @@ public class ThreadSingUNOMachine implements Runnable {
     public void setButtonUNOPressed(boolean buttonUNOPressed) {
         this.buttonUNOPressed = buttonUNOPressed;
     }
+    public void setCurrentTurn(int currentTurn){ this.currentTurn = currentTurn;}
 }
