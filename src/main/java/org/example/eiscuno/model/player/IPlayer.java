@@ -38,4 +38,6 @@ public interface IPlayer {
      * @param index The index of the card to remove.
      */
     void removeCard(int index);
+
+    Card[] getCurrentVisibleCards(int posInitCardToShow);
 }

@@ -60,6 +60,19 @@ public class Player implements IPlayer {
         return cardsPlayer.get(index);
     }
 
+    @Override
+    public Card[] getCurrentVisibleCards(int posInitCardToShow){
+        int totalCards = cardsPlayer.size();
+        int numVisibleCards = Math.min(4, totalCards - posInitCardToShow);
+        Card[] cards = new Card[numVisibleCards];
+
+        for (int i = 0; i < numVisibleCards; i++) {
+            cards[i] = getCard(posInitCardToShow + i);
+        }
+
+        return cards;
+    }
+
     public String getTypePlayer() {
         return typePlayer;
     }

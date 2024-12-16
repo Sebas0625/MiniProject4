@@ -34,17 +34,7 @@ public interface IGameUno {
      *
      * @param playerWhoSang the identifier of the player who shouted "Uno"
      */
-    void haveSungOne(String playerWhoSang);
-
-    /**
-     * Retrieves the current visible cards of the human player starting from a specific position.
-     *
-     * @param posInitCardToShow the starting position of the cards to be shown
-     * @return an array of cards that are currently visible to the human player
-     */
-    Card[] getCurrentVisibleCardsHumanPlayer(int posInitCardToShow);
-
-    Card[] getCurrentVisibleCardsMachinePLayer();
+    void hasSungOne(String playerWhoSang);
 
     Player getMachinePlayer();
 
