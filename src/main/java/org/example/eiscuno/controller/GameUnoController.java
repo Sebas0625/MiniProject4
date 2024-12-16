@@ -5,6 +5,7 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.Bounds;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.control.Button;
@@ -67,6 +68,9 @@ public class GameUnoController {
     @FXML
     private AnchorPane pieAnchorPane;
 
+    @FXML
+    private ImageView deckImageView;
+
     private Player humanPlayer;
     private Player machinePlayer;
     private Deck deck;
@@ -111,11 +115,14 @@ public class GameUnoController {
 
         for (int i = 0; i < 4; i++) {
             Card humanCard = humanPlayer.getCard(i);
-            animateCardDeal(humanCard, gridPaneCardsPlayer, i);
+            animateCardDeal(humanCard.getCard(), gridPaneCardsPlayer, i);
         }
         for (int i = 0; i < 4; i++) {
-            Card machineCard = machinePlayer.getCard(i);
-            animateCardDeal(machineCard, gridPaneCardsMachine, i);
+            ImageView machineCardImageView = new ImageView(new Image(getClass().getResource("/org/example/eiscuno/cards-uno/card_uno.png").toExternalForm()));
+            machineCardImageView.setY(16);
+            machineCardImageView.setFitHeight(90);
+            machineCardImageView.setFitWidth(70);
+            animateCardDeal(machineCardImageView, gridPaneCardsMachine, i);
         }
 
         PauseTransition pause = new PauseTransition(Duration.seconds(2));
@@ -187,9 +194,10 @@ public class GameUnoController {
         Card[] currentVisibleCardsMachinePlayer = machinePlayer.getCurrentVisibleCards(0);
             gridPaneCardsMachine.getChildren().clear();
             for (int i = 0; i < currentVisibleCardsMachinePlayer.length; i++){
-                Card card = currentVisibleCardsMachinePlayer[i];
-                ImageView cardImageView = card.getCard();
-
+                ImageView cardImageView = new ImageView(new Image(getClass().getResource("/org/example/eiscuno/cards-uno/card_uno.png").toExternalForm()));
+                cardImageView.setY(16);
+                cardImageView.setFitHeight(90);
+                cardImageView.setFitWidth(70);
                 gridPaneCardsMachine.add(cardImageView, i , 0);
 
                 updateCardsLabel("MACHINE_PLAYER");
@@ -441,32 +449,14 @@ public class GameUnoController {
         timeline.play(); // Start timeline
     }
 
-    public void discardCard(Card card) {
-        animateCardDiscard(card);
-    }
-
-    private void animateCardDiscard(Card card) {
-        ImageView cardImageView = card.getCard();
-        cardImageView.setOpacity(1);
-        tableImageView.setImage(card.getImage());
-
-        TranslateTransition translate = new TranslateTransition(Duration.seconds(0.5), cardImageView);
-        translate.setFromX(tableImageView.getLayoutX());
-        translate.setFromY(tableImageView.getLayoutY());
-        translate.setToX(tableImageView.getLayoutX() + 50);
-        translate.setToY(tableImageView.getLayoutY() + 50);
-        translate.play();
-    }
-
-    private void animateCardDeal(Card card, GridPane gridPane, int position) {
-        ImageView cardImageView = card.getCard();
+    private void animateCardDeal(ImageView cardImageView, GridPane gridPane, int position) {
         cardImageView.setOpacity(0);
         gridPane.add(cardImageView, position, 0);
 
         FadeTransition fadeIn = new FadeTransition(Duration.seconds(0.5), cardImageView);
         fadeIn.setFromValue(0);
         fadeIn.setToValue(1);
-        fadeIn.setDelay(Duration.seconds(position * 0.2)); // Retraso para cada carta
+        fadeIn.setDelay(Duration.seconds(position * 0.2));
         fadeIn.play();
     }
 

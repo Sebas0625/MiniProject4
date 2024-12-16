@@ -93,7 +93,6 @@ public class ThreadPlayMachine extends Thread{
             table.addCardOnTheTable(card);
             try {
                 Thread.sleep(1000);
-                //card.animateToTable((ImageView) gridPaneCardsMachine.getChildren().get(0), tableImageView);
                 tableImageView.setImage(card.getImage());
                 machinePlayer.removeCard(index);
             } catch (InterruptedException e){
@@ -101,6 +100,7 @@ public class ThreadPlayMachine extends Thread{
             }
             Platform.runLater(() -> {
                 try {
+                    // card.animateToTable((ImageView) gridPaneCardsMachine.getChildren().get(0), tableImageView);
                     gameUnoController.checkNumberCards(machinePlayer.getCardsPlayer().size(), machinePlayer.getTypePlayer(), gameUnoController.getCurrentTurn());
                     gameUnoController.printCardsMachinePlayer();
                     gameUnoController.handleCardAction(gameUno.getHumanPlayer(), card);
