@@ -4,5 +4,5 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
 public interface CardRenderer {
-    void animateToTable(ImageView tableImageView, Image cardImage);
+    void animateToTable(ImageView cardImageView, ImageView tableImageView, Image cardImage);
 }

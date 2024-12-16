@@ -69,7 +69,7 @@ public class Card {
         return color;
     }
 
-    public void animateToTable(ImageView tableImageView) {
-        renderer.animateToTable(tableImageView, image);
+    public void animateToTable(ImageView cardImageView, ImageView tableImageView) {
+        renderer.animateToTable(cardImageView, tableImageView, image);
     }
 }

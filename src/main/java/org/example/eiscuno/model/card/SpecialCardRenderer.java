@@ -15,7 +15,7 @@ import javafx.util.Duration;
 public class SpecialCardRenderer implements CardRenderer {
 
     @Override
-    public void animateToTable(ImageView tableImageView, Image cardImage) {
+    public void animateToTable(ImageView cardImageView, ImageView tableImageView, Image cardImage) {
         RotateTransition rotate = new RotateTransition(Duration.seconds(0.5), tableImageView);
         rotate.setByAngle(360);
         rotate.setOnFinished(event -> {

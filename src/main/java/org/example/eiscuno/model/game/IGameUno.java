@@ -34,7 +34,7 @@ public interface IGameUno {
      *
      * @param playerWhoSang the identifier of the player who shouted "Uno"
      */
-    void haveSungOne(String playerWhoSang);
+    void hasSungOne(String playerWhoSang);
 
     Player getMachinePlayer();
 

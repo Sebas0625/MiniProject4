@@ -13,10 +13,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
-import javafx.scene.shape.Arc;
 import javafx.util.Duration;
 import org.example.eiscuno.model.card.Card;
 import org.example.eiscuno.model.deck.Deck;
@@ -101,7 +97,7 @@ public class GameUnoController {
         this.gameUno = new GameUno(this.humanPlayer, this.machinePlayer, this.deck, this.table);
         this.posInitCardToShow = 0;
         this.currentState = new PlayerTurnState();
-        this.threadPlayMachine = new ThreadPlayMachine(gameUno, tableImageView);
+        this.threadPlayMachine = new ThreadPlayMachine(gameUno, tableImageView, gridPaneCardsMachine);
         this.buttonUNO.setDisable(true);
         this.threadSingUNOMachine = new ThreadSingUNOMachine(this.gameUno, this);
         Thread t = new Thread(threadSingUNOMachine, "ThreadSingUNO");
@@ -156,7 +152,7 @@ public class GameUnoController {
     /**
      * Prints the human player's cards on the grid pane.
      */
-    private void printCardsHumanPlayer() {
+    public void printCardsHumanPlayer() {
         this.gridPaneCardsPlayer.getChildren().clear();
         Card[] currentVisibleCardsHumanPlayer = humanPlayer.getCurrentVisibleCards(this.posInitCardToShow);
 
@@ -167,23 +163,16 @@ public class GameUnoController {
             cardImageView.setOnMouseClicked((MouseEvent event) -> {
                 if (isCardPosible(card, table) && getCurrentTurn() == 0){
                     gameUno.playCard(card);
-                    //tableImageView.setImage(card.getImage());
-                    card.animateToTable(tableImageView);
+                    tableImageView.setImage(card.getImage());
+                    //card.animateToTable(cardImageView, tableImageView);
                     humanPlayer.removeCard(findPosCardsHumanPlayer(card));
                     printCardsHumanPlayer();
 
                     try {
                         threadPlayMachine.setPlayerPlaying(true);
+                        checkNumberCards(humanPlayer.getCardsPlayer().size(), humanPlayer.getTypePlayer(), getCurrentTurn());
                         currentState.nexTurn(this);
                         handleCardAction(machinePlayer, card);
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-
-                    setDisableButton(true);
-
-                    try {
-                        checkNumberCards(humanPlayer.getCardsPlayer().size(), humanPlayer.getTypePlayer());
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
@@ -191,7 +180,7 @@ public class GameUnoController {
             });
             this.gridPaneCardsPlayer.add(cardImageView, i, 0);
         }
-        humanPlayerCardsLabel.setText("Tus cartas: " + humanPlayer.getCardsPlayer().size());
+        updateCardsLabel("HUMAN_PLAYER");
     }
 
     public void printCardsMachinePlayer(){
@@ -203,7 +192,7 @@ public class GameUnoController {
 
                 gridPaneCardsMachine.add(cardImageView, i , 0);
 
-                machineCardsLabel.setText("Cartas de la máquina: " + machinePlayer.getCardsPlayer().size());
+                updateCardsLabel("MACHINE_PLAYER");
             }
     }
 
@@ -257,7 +246,6 @@ public class GameUnoController {
                 break;
         }
         gameUno.getDeck().retournCard(card);
-        checkNumberCards(machinePlayer.getCardsPlayer().size(), machinePlayer.getTypePlayer());
     }
 
     /**
@@ -386,19 +374,22 @@ public class GameUnoController {
 
     @FXML
     void onHandleTakeCard() {
-        try {
-            if (deck.isEmpty()){
-                throw new GameException("El mazo de cartas se encuentra vacío");
-            } else {
-                gameUno.eatCard(humanPlayer, 1);
-                setDisableButton(true);
-                if (this.posInitCardToShow < this.humanPlayer.getCardsPlayer().size() - 4) {
-                    posInitCardToShow = humanPlayer.getCardsPlayer().size() - 4;
+        if (currentState instanceof PlayerTurnState){
+            try {
+                if (deck.isEmpty()){
+                    throw new GameException("El mazo de cartas se encuentra vacío");
+                } else {
+                    gameUno.eatCard(humanPlayer, 1);
+                    if (this.posInitCardToShow < this.humanPlayer.getCardsPlayer().size() - 4) {
+                        posInitCardToShow = humanPlayer.getCardsPlayer().size() - 4;
+                    }
+                    printCardsHumanPlayer();
+                    currentState.nexTurn(this);
+                    threadPlayMachine.setPlayerPlaying(false);
                 }
-                printCardsHumanPlayer();
+            } catch (GameException e){
+                System.out.println(e.getCause());
             }
-        } catch (GameException e){
-            System.out.println(e.getCause());
         }
     }
 
@@ -410,26 +401,14 @@ public class GameUnoController {
     @FXML
     void onHandleUno(ActionEvent event) {
         threadSingUNOMachine.setButtonUNOPressed(true);
-        showAdviseUnoTemporarily(adviseUnoPlayer);
     }
 
-    /**
-     * Updates visible cards in the player's hand
-     */
-    public void updateVisibleCardsHumanPlayer() {
-        printCardsHumanPlayer();
-    }
-
-    public void checkNumberCards(int numberCards, String typePlayer) throws Exception{
+    public void checkNumberCards(int numberCards, String typePlayer, int currentTurn) throws Exception{
         if(numberCards == 1){
-            if(Objects.equals(typePlayer, "HUMAN_PLAYER")){
-                setDisableButton(false);
-                threadSingUNOMachine.setRunning(true);
-                threadSingUNOMachine.setButtonUNOPressed(false);
-            }
-            else{
-                showAdviseUnoTemporarily(adviseUnoMachine);
-            }
+            setDisableUnoButton(false);
+            threadSingUNOMachine.setRunning(true);
+            threadSingUNOMachine.setCurrentTurn(currentTurn);
+            threadSingUNOMachine.setButtonUNOPressed(false);
         }
         else if(numberCards == 0){
             GameUnoStage.closeInstance();
@@ -442,18 +421,24 @@ public class GameUnoController {
         }
     }
 
-    public void setDisableButton(boolean disable){
+    public void setDisableUnoButton(boolean disable){
         buttonUNO.setDisable(disable);
     }
 
-    private void showAdviseUnoTemporarily(ImageView adviseUno) {
+    public void showAdviseUnoTemporarily(int type) {
+        ImageView adviseUno;
+        if (type == 0){
+            adviseUno = adviseUnoPlayer;
+        } else {
+            adviseUno = adviseUnoMachine;
+        }
         adviseUno.setVisible(true);
         Timeline timeline = new Timeline(new KeyFrame(
                 Duration.seconds(3),
                 event -> adviseUno.setVisible(false)
         ));
         timeline.setCycleCount(1);
-        timeline.play(); // Start animation
+        timeline.play(); // Start timeline
     }
 
     public void discardCard(Card card) {
@@ -491,5 +476,11 @@ public class GameUnoController {
         messageLabel.setText(message);
     }
 
-    public ThreadPlayMachine getThreadPlayMachine(){ return threadPlayMachine; }
+    public void updateCardsLabel(String player){
+        if (player == "HUMAN_PLAYER"){
+            humanPlayerCardsLabel.setText("Tus cartas: " + humanPlayer.getCardsPlayer().size());
+        } else{
+            machineCardsLabel.setText("Cartas de la máquina: " + machinePlayer.getCardsPlayer().size());
+        }
+    }
 }

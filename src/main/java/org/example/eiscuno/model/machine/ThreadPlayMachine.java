@@ -16,13 +16,15 @@ import java.io.IOException;
 public class ThreadPlayMachine extends Thread{
     private final GameUno gameUno;
     private final ImageView tableImageView;
+    private final GridPane gridPaneCardsMachine;
     private volatile boolean running = true;
     private volatile boolean machinePlaying = false;
     private volatile boolean playerPlaying;
 
-    public ThreadPlayMachine(GameUno gameUno, ImageView tableImageView) {
+    public ThreadPlayMachine(GameUno gameUno, ImageView tableImageView, GridPane gridPaneCardsMachine) {
         this.gameUno = gameUno;
         this.tableImageView = tableImageView;
+        this.gridPaneCardsMachine = gridPaneCardsMachine;
     }
 
     public void stopThread(){
@@ -37,7 +39,7 @@ public class ThreadPlayMachine extends Thread{
 
                 if (currentTurn == 1 && !machinePlaying && !playerPlaying){
                     machinePlaying = true;
-                    Thread.sleep((long) (3000));
+                    Thread.sleep((long) (2000 + Math.random() * 2000));
                     putCardOnTheTable();
                     gameUnoController.getCurrentState().nexTurn(gameUnoController);
                     machinePlaying = false;
@@ -77,36 +79,36 @@ public class ThreadPlayMachine extends Thread{
             foundValidCard = true;
         }
 
-        // if machine has no valid cards, eats until finds any valid one
-        while (!foundValidCard){
+        // if machine hasn't found any valid card, eats one card
+        if (!foundValidCard){
             gameUno.eatCard(machinePlayer, 1);
             System.out.println("La máquina ha comido una carta");
-            if (gameUnoController.isCardPosible(machinePlayer.getCard(machinePlayer.getCardsPlayer().size() - 1), table)){
-                index = machinePlayer.getCardsPlayer().size() - 1;
-                foundValidCard = true;
-            }
-        }
-
-        Card card = machinePlayer.getCardsPlayer().get(index);
-
-        table.addCardOnTheTable(card);
-        try {
-            Thread.sleep(1000);
-            card.animateToTable(tableImageView);
-            //tableImageView.setImage(card.getImage());
-            machinePlayer.removeCard(index);
-        } catch (InterruptedException e){
-            System.out.println(e.getCause());
-        }
-
-        Platform.runLater(() -> {
-            try {
+            Platform.runLater(() -> {
+                gameUnoController.updateCardsLabel("MACHINE_PLAYER");
                 gameUnoController.printCardsMachinePlayer();
-                gameUnoController.handleCardAction(gameUno.getHumanPlayer(), card);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
+            });
+        } else{
+            Card card = machinePlayer.getCardsPlayer().get(index);
+
+            table.addCardOnTheTable(card);
+            try {
+                Thread.sleep(1000);
+                //card.animateToTable((ImageView) gridPaneCardsMachine.getChildren().get(0), tableImageView);
+                tableImageView.setImage(card.getImage());
+                machinePlayer.removeCard(index);
+            } catch (InterruptedException e){
+                System.out.println(e.getCause());
             }
-        });
+            Platform.runLater(() -> {
+                try {
+                    gameUnoController.checkNumberCards(machinePlayer.getCardsPlayer().size(), machinePlayer.getTypePlayer(), gameUnoController.getCurrentTurn());
+                    gameUnoController.printCardsMachinePlayer();
+                    gameUnoController.handleCardAction(gameUno.getHumanPlayer(), card);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        }
     }
 
     public void setPlayerPlaying(boolean playerPlaying){

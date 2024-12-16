@@ -78,7 +78,7 @@ public class GameUno implements IGameUno {
      * @param playerWhoSang The player who shouted "Uno".
      */
     @Override
-    public void haveSungOne(String playerWhoSang) {
+    public void hasSungOne(String playerWhoSang) {
         if (playerWhoSang.equals("HUMAN_PLAYER")) {
             machinePlayer.addCard(this.deck.takeCard());
         } else {
