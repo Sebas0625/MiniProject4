@@ -2,16 +2,18 @@ package org.example.eiscuno.model.card;
 
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.Pane;
 
 /**
  * Represents a card in the Uno game.
  */
 public class Card {
-    private String url;
-    private String value;
-    private String color;
-    private Image image;
-    private ImageView cardImageView;
+    private final String url;
+    private final String value;
+    private final String color;
+    private final Image image;
+    private final ImageView cardImageView;
+    protected final CardRenderer renderer;
 
     /**
      * Constructs a Card with the specified image URL and name.
@@ -19,12 +21,13 @@ public class Card {
      * @param url the URL of the card image
      * @param value of the card
      */
-    public Card(String url, String value, String color) {
+    public Card(String url, String value, String color, CardRenderer renderer) {
         this.url = url;
         this.value = value;
         this.color = color;
         this.image = new Image(String.valueOf(getClass().getResource(url)));
         this.cardImageView = createCardImageView();
+        this.renderer = renderer;
     }
 
     /**
@@ -64,5 +67,9 @@ public class Card {
 
     public String getColor() {
         return color;
+    }
+
+    public void animateToTable(ImageView tableImageView) {
+        renderer.animateToTable(tableImageView, image);
     }
 }

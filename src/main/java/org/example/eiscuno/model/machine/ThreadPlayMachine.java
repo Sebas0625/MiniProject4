@@ -18,6 +18,7 @@ public class ThreadPlayMachine extends Thread{
     private final ImageView tableImageView;
     private volatile boolean running = true;
     private volatile boolean machinePlaying = false;
+    private volatile boolean playerPlaying;
 
     public ThreadPlayMachine(GameUno gameUno, ImageView tableImageView) {
         this.gameUno = gameUno;
@@ -34,11 +35,11 @@ public class ThreadPlayMachine extends Thread{
                 GameUnoController gameUnoController = GameUnoStage.getInstance().getGameUnoController();
                 int currentTurn = gameUnoController.getCurrentTurn();
 
-                if (currentTurn == 1 && !machinePlaying){
+                if (currentTurn == 1 && !machinePlaying && !playerPlaying){
                     machinePlaying = true;
-                    Thread.sleep((long) (/*Math.random() **/ 3000));
+                    Thread.sleep((long) (3000));
                     putCardOnTheTable();
-                    gameUnoController.nextTurn();
+                    gameUnoController.getCurrentState().nexTurn(gameUnoController);
                     machinePlaying = false;
                 }
             } catch (IOException | InterruptedException e){
@@ -89,20 +90,26 @@ public class ThreadPlayMachine extends Thread{
         Card card = machinePlayer.getCardsPlayer().get(index);
 
         table.addCardOnTheTable(card);
-        tableImageView.setImage(card.getImage());
-        machinePlayer.removeCard(index);
+        try {
+            Thread.sleep(1000);
+            card.animateToTable(tableImageView);
+            //tableImageView.setImage(card.getImage());
+            machinePlayer.removeCard(index);
+        } catch (InterruptedException e){
+            System.out.println(e.getCause());
+        }
 
         Platform.runLater(() -> {
             try {
                 gameUnoController.printCardsMachinePlayer();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-            try {
                 gameUnoController.handleCardAction(gameUno.getHumanPlayer(), card);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         });
+    }
+
+    public void setPlayerPlaying(boolean playerPlaying){
+        this.playerPlaying = playerPlaying;
     }
 }

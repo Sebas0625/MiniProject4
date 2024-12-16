@@ -20,7 +20,10 @@ import javafx.scene.shape.Arc;
 import javafx.util.Duration;
 import org.example.eiscuno.model.card.Card;
 import org.example.eiscuno.model.deck.Deck;
+import org.example.eiscuno.model.exception.GameException;
 import org.example.eiscuno.model.game.GameUno;
+import org.example.eiscuno.model.gameState.GameState;
+import org.example.eiscuno.model.gameState.PlayerTurnState;
 import org.example.eiscuno.model.machine.ThreadSingUNOMachine;
 import org.example.eiscuno.model.machine.ThreadPlayMachine;
 import org.example.eiscuno.model.player.Player;
@@ -76,7 +79,7 @@ public class GameUnoController {
     private int posInitCardToShow;
     private ThreadPlayMachine threadPlayMachine;
     private ThreadSingUNOMachine threadSingUNOMachine;
-    private int currentTurn = 0;
+    private GameState currentState;
 
     /**
      * Initializes the controller.
@@ -97,6 +100,7 @@ public class GameUnoController {
         this.table = new Table();
         this.gameUno = new GameUno(this.humanPlayer, this.machinePlayer, this.deck, this.table);
         this.posInitCardToShow = 0;
+        this.currentState = new PlayerTurnState();
         this.threadPlayMachine = new ThreadPlayMachine(gameUno, tableImageView);
         this.buttonUNO.setDisable(true);
         this.threadSingUNOMachine = new ThreadSingUNOMachine(this.gameUno, this);
@@ -127,7 +131,21 @@ public class GameUnoController {
                 throw new RuntimeException(e);
             }
 
-            Card firstCard = gameUno.getDeck().takeCard();
+            Card firstCard;
+            boolean isCardPosible;
+            do {
+                isCardPosible = true;
+                firstCard = gameUno.getDeck().takeCard();
+                if (Objects.equals(firstCard.getValue(), "FOUR")
+                    || Objects.equals(firstCard.getValue(), "TWO")
+                    || Objects.equals(firstCard.getValue(), "SKIP")
+                    || Objects.equals(firstCard.getValue(), "REVERSE")
+                    || Objects.equals(firstCard.getValue(), "WILD")){
+                    isCardPosible = false;
+                    gameUno.getDeck().retournCard(firstCard);
+                }
+            } while (!isCardPosible);
+
             table.addCardOnTheTable(firstCard);
             tableImageView.setImage(firstCard.getImage());
             threadPlayMachine.start();
@@ -140,26 +158,29 @@ public class GameUnoController {
      */
     private void printCardsHumanPlayer() {
         this.gridPaneCardsPlayer.getChildren().clear();
-        Card[] currentVisibleCardsHumanPlayer = this.gameUno.getCurrentVisibleCardsHumanPlayer(this.posInitCardToShow);
+        Card[] currentVisibleCardsHumanPlayer = humanPlayer.getCurrentVisibleCards(this.posInitCardToShow);
 
         for (int i = 0; i < currentVisibleCardsHumanPlayer.length; i++) {
             Card card = currentVisibleCardsHumanPlayer[i];
             ImageView cardImageView = card.getCard();
 
             cardImageView.setOnMouseClicked((MouseEvent event) -> {
-                if (isCardPosible(card, table) && currentTurn == 0){
+                if (isCardPosible(card, table) && getCurrentTurn() == 0){
                     gameUno.playCard(card);
-                    tableImageView.setImage(card.getImage());
+                    //tableImageView.setImage(card.getImage());
+                    card.animateToTable(tableImageView);
                     humanPlayer.removeCard(findPosCardsHumanPlayer(card));
                     printCardsHumanPlayer();
 
                     try {
+                        threadPlayMachine.setPlayerPlaying(true);
+                        currentState.nexTurn(this);
                         handleCardAction(machinePlayer, card);
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
+
                     setDisableButton(true);
-                    nextTurn();
 
                     try {
                         checkNumberCards(humanPlayer.getCardsPlayer().size(), humanPlayer.getTypePlayer());
@@ -174,7 +195,7 @@ public class GameUnoController {
     }
 
     public void printCardsMachinePlayer(){
-        Card[] currentVisibleCardsMachinePlayer = this.gameUno.getCurrentVisibleCardsMachinePLayer();
+        Card[] currentVisibleCardsMachinePlayer = machinePlayer.getCurrentVisibleCards(0);
             gridPaneCardsMachine.getChildren().clear();
             for (int i = 0; i < currentVisibleCardsMachinePlayer.length; i++){
                 Card card = currentVisibleCardsMachinePlayer[i];
@@ -212,6 +233,7 @@ public class GameUnoController {
                 if (targetPlayer == humanPlayer){
                     printCardsHumanPlayer();
                 } else {
+                    threadPlayMachine.setPlayerPlaying(false);
                     printCardsMachinePlayer();
                 }
                 break;
@@ -220,18 +242,21 @@ public class GameUnoController {
                 tableImageView.setVisible(false);
                 showUpMessage("+2");
                 if (targetPlayer == humanPlayer){ handleMachineColorSelection(); }
+                break;
             case "SKIP":
                 showUpMessage("TURNO SALTADO");
-                nextTurn();
+                currentState.nexTurn(this);
                 break;
             case "REVERSE":
                 showUpMessage("SENTIDO CAMBIADO");
-                nextTurn();
+                currentState.nexTurn(this);
                 break;
             default:
                 System.out.println("La carta no tiene ninguna característica");
+                threadPlayMachine.setPlayerPlaying(false);
                 break;
         }
+        gameUno.getDeck().retournCard(card);
         checkNumberCards(machinePlayer.getCardsPlayer().size(), machinePlayer.getTypePlayer());
     }
 
@@ -279,6 +304,7 @@ public class GameUnoController {
         this.table.setCurrentColor("BLUE");
         this.pieAnchorPane.setVisible(false);
         tableImageView.setVisible(true);
+        threadPlayMachine.setPlayerPlaying(false);
     }
 
     @FXML
@@ -291,6 +317,7 @@ public class GameUnoController {
         this.table.setCurrentColor("RED");
         this.pieAnchorPane.setVisible(false);
         tableImageView.setVisible(true);
+        threadPlayMachine.setPlayerPlaying(false);
     }
 
     @FXML
@@ -303,6 +330,7 @@ public class GameUnoController {
         this.table.setCurrentColor("YELLOW");
         this.pieAnchorPane.setVisible(false);
         tableImageView.setVisible(true);
+        threadPlayMachine.setPlayerPlaying(false);
     }
 
     @FXML
@@ -315,14 +343,19 @@ public class GameUnoController {
         this.table.setCurrentColor("GREEN");
         this.pieAnchorPane.setVisible(false);
         tableImageView.setVisible(true);
+        threadPlayMachine.setPlayerPlaying(false);
     }
 
-    public void nextTurn(){
-        this.currentTurn = this.currentTurn == 0 ? 1 : 0;
+    public void setState(GameState state) {
+        this.currentState = state;
+    }
+
+    public GameState getCurrentState() {
+        return currentState;
     }
 
     public int getCurrentTurn(){
-        return this.currentTurn;
+        return currentState instanceof PlayerTurnState ? 0 : 1;
     }
 
     /**
@@ -353,12 +386,20 @@ public class GameUnoController {
 
     @FXML
     void onHandleTakeCard() {
-        gameUno.eatCard(humanPlayer, 1);
-        setDisableButton(true);
-        if (this.posInitCardToShow < this.humanPlayer.getCardsPlayer().size() - 4) {
-            posInitCardToShow = humanPlayer.getCardsPlayer().size() - 4;
+        try {
+            if (deck.isEmpty()){
+                throw new GameException("El mazo de cartas se encuentra vacío");
+            } else {
+                gameUno.eatCard(humanPlayer, 1);
+                setDisableButton(true);
+                if (this.posInitCardToShow < this.humanPlayer.getCardsPlayer().size() - 4) {
+                    posInitCardToShow = humanPlayer.getCardsPlayer().size() - 4;
+                }
+                printCardsHumanPlayer();
+            }
+        } catch (GameException e){
+            System.out.println(e.getCause());
         }
-        printCardsHumanPlayer();
     }
 
     /**

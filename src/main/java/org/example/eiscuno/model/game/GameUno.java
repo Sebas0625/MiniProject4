@@ -29,7 +29,6 @@ public class GameUno implements IGameUno {
         this.machinePlayer = machinePlayer;
         this.deck = deck;
         this.table = table;
-//        startGame();
     }
 
     /**
@@ -86,39 +85,7 @@ public class GameUno implements IGameUno {
             humanPlayer.addCard(this.deck.takeCard());
         }
     }
-
-    /**
-     * Retrieves the current visible cards of the human player starting from a specific position.
-     *
-     * @param posInitCardToShow The initial position of the cards to show.
-     * @return An array of cards visible to the human player.
-     */
-    @Override
-    public Card[] getCurrentVisibleCardsHumanPlayer(int posInitCardToShow) {
-        int totalCards = this.humanPlayer.getCardsPlayer().size();
-        int numVisibleCards = Math.min(4, totalCards - posInitCardToShow);
-        Card[] cards = new Card[numVisibleCards];
-
-        for (int i = 0; i < numVisibleCards; i++) {
-            cards[i] = this.humanPlayer.getCard(posInitCardToShow + i);
-        }
-
-        return cards;
-    }
-
-    @Override
-    public Card[] getCurrentVisibleCardsMachinePLayer() {
-        int totalCards = this.machinePlayer.getCardsPlayer().size();
-        int numVisibleCards = Math.min(4, totalCards);
-        Card[] cards = new Card[numVisibleCards];
-
-        for (int i = 0; i < numVisibleCards; i++) {
-            cards[i] = this.machinePlayer.getCard(i);
-        }
-
-        return cards;
-    }
-
+    
     @Override
     public Player getMachinePlayer(){
         return machinePlayer;
