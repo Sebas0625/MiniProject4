@@ -12,7 +12,11 @@ import org.example.eiscuno.model.table.Table;
 import org.example.eiscuno.view.GameUnoStage;
 
 import java.io.IOException;
-
+/**
+ * A thread that handles the machine player's turn in the UNO game.
+ * Manages the machine's card-playing behavior and ensures the game progresses
+ * when it is the machine's turn.
+ */
 public class ThreadPlayMachine extends Thread{
     private final GameUno gameUno;
     private final ImageView tableImageView;
@@ -21,16 +25,35 @@ public class ThreadPlayMachine extends Thread{
     private volatile boolean machinePlaying = false;
     private volatile boolean playerPlaying;
 
+    /**
+     * Constructs a ThreadPlayMachine with the given game logic, table image, and grid pane for the machine's cards.
+     *
+     * @param gameUno The {@code GameUno} instance managing the game logic.
+     * @param tableImageView The {@code ImageView} representing the table where cards are played.
+     * @param gridPaneCardsMachine The {@code GridPane} containing the machine's cards.
+     */
     public ThreadPlayMachine(GameUno gameUno, ImageView tableImageView, GridPane gridPaneCardsMachine) {
         this.gameUno = gameUno;
         this.tableImageView = tableImageView;
         this.gridPaneCardsMachine = gridPaneCardsMachine;
     }
-
+    /**
+     * Stops the execution of the thread by setting the {@code running} flag to {@code false}.
+     */
     public void stopThread(){
         running = false;
     }
 
+    /**
+     * The main logic for the thread, executed when the thread is running.
+     * Continuously checks if it is the machine's turn to play. If the conditions are met:
+     *     Sets the {@code machinePlaying} flag to {@code true}.
+     *     Waits for a random duration between 2 and 4 seconds before playing a card.
+     *     Places a card on the table using {@code putCardOnTheTable()}.
+     *     Advances the game turn to the next player.
+     *     Sets the {@code machinePlaying} flag back to {@code false}.
+     * The thread continues running until the {@code running} flag is set to {@code false}.
+     */
     public void run(){
         while (running){
             try {
@@ -49,6 +72,16 @@ public class ThreadPlayMachine extends Thread{
             }
         }
     }
+    /**
+     * Places a valid card from the machine player's hand onto the table.
+     *
+     * <p>The method attempts to find a valid card that the machine can play
+     * according to the current game state. It first tries with random cards from
+     * the machine player's hand. If no valid card is found after checking all
+     * cards randomly, it searches systematically through the player's cards.
+     *
+     * @throws IOException If an I/O error occurs while interacting with the game controller.
+     */
 
     public void putCardOnTheTable() throws IOException {
         GameUnoController gameUnoController = GameUnoStage.getInstance().getGameUnoController();
@@ -111,6 +144,15 @@ public class ThreadPlayMachine extends Thread{
         }
     }
 
+    /**
+     * Sets the playing state of the player.
+     *
+     * <p>This method updates the {@code playerPlaying} flag to indicate whether
+     * the player is currently taking their turn in the game or not.
+     *
+     * @param playerPlaying {@code true} if the player is currently playing their turn,
+     *                      {@code false} if the player is not playing.
+     */
     public void setPlayerPlaying(boolean playerPlaying){
         this.playerPlaying = playerPlaying;
     }

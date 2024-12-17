@@ -8,7 +8,10 @@ import org.example.eiscuno.model.game.GameUno;
 import org.example.eiscuno.model.player.Player;
 
 import java.util.ArrayList;
-
+/**
+ * ThreadSingUNOMachine handles the behavior of a machine player in the UNO game
+ * running as a separate thread.
+ */
 public class ThreadSingUNOMachine implements Runnable {
     private final GameUno gameUno;
     private final GameUnoController gameUnoController;
@@ -16,11 +19,21 @@ public class ThreadSingUNOMachine implements Runnable {
     private boolean buttonUNOPressed = false;
     private int currentTurn;
 
+    /**
+     * Constructs a ThreadSingUNOMachine with the given game logic and controller.
+     *
+     * @param gameUno The instance of GameUno containing the game logic.
+     * @param gameUnoController The controller managing the game interactions and UI.
+     */
     public ThreadSingUNOMachine(GameUno gameUno, GameUnoController gameUnoController) {
         this.gameUno = gameUno;
         this.gameUnoController = gameUnoController;
     }
-
+    /**
+     * Executes the logic for the machine player in the UNO game when the thread is running.
+     * Continuously checks if the thread is active (`running`).
+     * The thread stops its main logic once the `running` flag is set to false.
+     */
     @Override
     public void run(){
         while (true){
@@ -31,16 +44,18 @@ public class ThreadSingUNOMachine implements Runnable {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-
                 checkUno();
-
                 Platform.runLater(() -> gameUnoController.setDisableUnoButton(true));
-
                 running = false;
             }
         }
     }
 
+    /**
+     * Checks the current turn and determines the outcome of the "UNO" action.
+     * This method evaluates whether the "UNO" button was pressed and executes the corresponding logic
+     * for the human or machine player based on the current turn.
+     */
     public void checkUno(){
         if (currentTurn == 0){
             if (buttonUNOPressed){
@@ -68,12 +83,28 @@ public class ThreadSingUNOMachine implements Runnable {
             }
         }
     }
-
+    /**
+     * Sets the running state of the thread.
+     *
+     * @param running {@code true} to start the thread's execution logic,
+     *                {@code false} to stop it.
+     */
     public void setRunning(boolean running) {
         this.running = running;
     }
+    /**
+     * Sets the state of the "UNO" button press.
+     *
+     * @param buttonUNOPressed {@code true} if the "UNO" button has been pressed,
+     *                         {@code false} otherwise.
+     */
     public void setButtonUNOPressed(boolean buttonUNOPressed) {
         this.buttonUNOPressed = buttonUNOPressed;
     }
+    /**
+     * Sets the current turn in the game.
+     *
+     * @param currentTurn The current turn of the game
+     */
     public void setCurrentTurn(int currentTurn){ this.currentTurn = currentTurn;}
 }
