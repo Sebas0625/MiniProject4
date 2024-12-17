@@ -107,4 +107,5 @@ public class ThreadSingUNOMachine implements Runnable {
      * @param currentTurn The current turn of the game
      */
     public void setCurrentTurn(int currentTurn){ this.currentTurn = currentTurn;}
+    public boolean getButtonUNOPressed(){ return buttonUNOPressed;}
 }

@@ -4,6 +4,7 @@ import javafx.animation.*;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.fxml.FXML;
+import javafx.geometry.Bounds;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.control.Button;
@@ -25,6 +26,8 @@ import org.example.eiscuno.model.machine.ThreadSingUNOMachine;
 import org.example.eiscuno.model.machine.ThreadPlayMachine;
 import org.example.eiscuno.model.player.Player;
 import org.example.eiscuno.model.table.Table;
+import javafx.animation.FadeTransition;
+import javafx.animation.TranslateTransition;
 import org.example.eiscuno.view.GameUnoStage;
 import org.example.eiscuno.view.LoseStage;
 import org.example.eiscuno.view.WinStage;
@@ -65,6 +68,9 @@ public class GameUnoController {
 
     @FXML
     private AnchorPane pieAnchorPane;
+
+    @FXML
+    private ImageView deckImageView;
 
     @FXML
     private ImageView messageImageView;
@@ -115,11 +121,14 @@ public class GameUnoController {
 
         for (int i = 0; i < 4; i++) {
             Card humanCard = humanPlayer.getCard(i);
-            animateCardDeal(humanCard, gridPaneCardsPlayer, i);
+            animateCardDeal(humanCard.getCard(), gridPaneCardsPlayer, i);
         }
         for (int i = 0; i < 4; i++) {
-            Card machineCard = machinePlayer.getCard(i);
-            animateCardDeal(machineCard, gridPaneCardsMachine, i);
+            ImageView machineCardImageView = new ImageView(new Image(getClass().getResource("/org/example/eiscuno/cards-uno/card_uno.png").toExternalForm()));
+            machineCardImageView.setY(16);
+            machineCardImageView.setFitHeight(90);
+            machineCardImageView.setFitWidth(70);
+            animateCardDeal(machineCardImageView, gridPaneCardsMachine, i);
         }
 
         PauseTransition pause = new PauseTransition(Duration.seconds(2));
@@ -167,8 +176,9 @@ public class GameUnoController {
             cardImageView.setOnMouseClicked((MouseEvent event) -> {
                 if (isCardPosible(card, table) && getCurrentTurn() == 0){
                     gameUno.playCard(card);
-                    tableImageView.setImage(card.getImage());
-                    //card.animateToTable(cardImageView, tableImageView);
+
+                    card.animateToTable(cardImageView, tableImageView);
+
                     humanPlayer.removeCard(findPosCardsHumanPlayer(card));
                     printCardsHumanPlayer();
 
@@ -191,9 +201,10 @@ public class GameUnoController {
         Card[] currentVisibleCardsMachinePlayer = machinePlayer.getCurrentVisibleCards(0);
             gridPaneCardsMachine.getChildren().clear();
             for (int i = 0; i < currentVisibleCardsMachinePlayer.length; i++){
-                Card card = currentVisibleCardsMachinePlayer[i];
-                ImageView cardImageView = card.getCard();
-
+                ImageView cardImageView = new ImageView(new Image(getClass().getResource("/org/example/eiscuno/cards-uno/card_uno.png").toExternalForm()));
+                cardImageView.setY(16);
+                cardImageView.setFitHeight(90);
+                cardImageView.setFitWidth(70);
                 gridPaneCardsMachine.add(cardImageView, i , 0);
 
                 updateCardsLabel("MACHINE_PLAYER");
@@ -446,15 +457,14 @@ public class GameUnoController {
         timeline.play(); // Start timeline
     }
 
-    private void animateCardDeal(Card card, GridPane gridPane, int position) {
-        ImageView cardImageView = card.getCard();
+    private void animateCardDeal(ImageView cardImageView, GridPane gridPane, int position) {
         cardImageView.setOpacity(0);
         gridPane.add(cardImageView, position, 0);
 
         FadeTransition fadeIn = new FadeTransition(Duration.seconds(0.5), cardImageView);
         fadeIn.setFromValue(0);
         fadeIn.setToValue(1);
-        fadeIn.setDelay(Duration.seconds(position * 0.2)); // Retraso para cada carta
+        fadeIn.setDelay(Duration.seconds(position * 0.2));
         fadeIn.play();
     }
 
@@ -539,6 +549,10 @@ public class GameUnoController {
         } else{
             machineCardsLabel.setText("Cartas de la máquina: " + machinePlayer.getCardsPlayer().size());
         }
+    }
+
+    public  GameUno getGameUno(){
+        return gameUno;
     }
 
     public ThreadPlayMachine getThreadPlayMachine() { return threadPlayMachine; }
