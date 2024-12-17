@@ -18,12 +18,25 @@ import org.example.eiscuno.view.WinStage;
 import java.io.IOException;
 
 public class WelcomeController {
-
+    /**
+     * Handles the play button action to start the game.
+     * This method is triggered when the user clicks the play button. It initializes the game by calling
+     * {@code getInstance} on the {@link GameUnoStage} class to display the game stage and then closes
+     * the welcome stage using {@code closeInstance} from the {@link WelcomeStage} class.
+     *
+     * @param event the event that triggered the method, typically a button click.
+     * @throws IOException if an input or output error occurs while initializing the game stage.
+     */
     public void handlePlay(ActionEvent event) throws IOException {
         GameUnoStage.getInstance();
         WelcomeStage.closeInstance();
     }
 
+    /**
+     * Displays a window with the names of the UNO game creators and their respective codes
+     * @param event Wait for a click event
+     * @throws IOException Resource Loading
+     */
     public void handleCredits(ActionEvent event) throws IOException {
         Stage creditsStage = new Stage();
         creditsStage.setTitle("Créditos");
@@ -73,6 +86,11 @@ public class WelcomeController {
         creditsStage.showAndWait();
     }
 
+    /**
+     *
+     Close the WelcomeStage instance
+     * @param event Wait for a click event
+     */
     public void handleExit(ActionEvent event){
         WelcomeStage.deleteInstance();
     }
