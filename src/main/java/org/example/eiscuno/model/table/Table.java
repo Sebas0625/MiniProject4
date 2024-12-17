@@ -40,12 +40,30 @@ public class Table {
         }
         return this.cardsTable.get(this.cardsTable.size()-1);
     }
-
-    public void setCurrentColor(String color){
+    /**
+     * Sets the current color of the game.
+     *
+     * @param color the color to be set as the current color
+     */
+    public void setCurrentColor(String color) {
         this.currentColor = color;
     }
 
-    public String getCurrentColor(){ return currentColor; }
+    /**
+     * Retrieves the current color of the game.
+     *
+     * @return the current color
+     */
+    public String getCurrentColor() {
+        return currentColor;
+    }
 
-    public String getCurrentNum(){ return currentNum; }
+    /**
+     * Retrieves the current number of the game.
+     *
+     * @return the current number
+     */
+    public String getCurrentNum() {
+        return currentNum;
+    }
 }

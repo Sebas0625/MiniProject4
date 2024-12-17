@@ -5,7 +5,6 @@ module org.example.eiscuno {
     requires java.desktop;
     requires java.naming;
 
-
     opens org.example.eiscuno to javafx.fxml;
     opens org.example.eiscuno.controller to javafx.fxml;
     exports org.example.eiscuno;

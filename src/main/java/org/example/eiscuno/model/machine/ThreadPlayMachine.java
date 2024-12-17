@@ -119,20 +119,24 @@ public class ThreadPlayMachine extends Thread{
                 gameUnoController.printCardsMachinePlayer();
             });
         } else{
-            Card card = machinePlayer.getCardsPlayer().get(index);
-            table.addCardOnTheTable(card);
-            tableImageView.setImage(card.getImage());
-            machinePlayer.removeCard(index);
+            try {
+                Card card = machinePlayer.getCardsPlayer().get(index);
+                table.addCardOnTheTable(card);
+                tableImageView.setImage(card.getImage());
+                machinePlayer.removeCard(index);
 
-            Platform.runLater(() -> {
-                try {
-                    gameUnoController.checkNumberCards(machinePlayer.getCardsPlayer().size(), machinePlayer.getTypePlayer(), 1);
-                    gameUnoController.printCardsMachinePlayer();
-                    gameUnoController.handleCardAction(gameUno.getHumanPlayer(), card);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            });
+                Platform.runLater(() -> {
+                    try {
+                        gameUnoController.checkNumberCards(machinePlayer.getCardsPlayer().size(), machinePlayer.getTypePlayer(), 1);
+                        gameUnoController.printCardsMachinePlayer();
+                        gameUnoController.handleCardAction(gameUno.getHumanPlayer(), card);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+            } catch (IndexOutOfBoundsException e) {
+                e.printStackTrace();
+            }
         }
     }
 
