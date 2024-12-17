@@ -6,7 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="1ee8ff40-bbdd-4aec-a3d2-cf5cc45130ec" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/eiscuno/controller/GameUnoController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/eiscuno/controller/GameUnoController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/org/example/eiscuno/fxml/game-uno-view.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/org/example/eiscuno/fxml/game-uno-view.fxml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -78,12 +78,13 @@
     "ASKED_ADD_EXTERNAL_FILES": "true",
     "Application.HelloApplication.executor": "Run",
     "Application.Main.executor": "Run",
+    "JUnit.GameUnoTest.executor": "Run",
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "git-widget-placeholder": "matc",
+    "git-widget-placeholder": "jssc",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/MAYCOL/Documents/Tercer Semestre Univalle/POE/MiniProject4/src/main/resources/org/example/eiscuno/images",
+    "last_opened_file_path": "C:/Users/sebas/OneDrive/Desktop/Proyectos-POE/MiniProyecto3",
     "list.type.of.created.stylesheet": "CSS",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
@@ -110,10 +111,10 @@
       <recent name="C:\Users\fsvc1\Coding\eisc-uno\src\main\resources\org\example\eiscuno\images" />
     </key>
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Application.Main">
     <configuration name="Main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="org.example.eiscuno.Main" />
-      <module name="eisc-uno" />
+      <module name="MiniProject3" />
       <extension name="coverage">
         <pattern>
           <option name="PATTERN" value="org.example.eiscuno.*" />
@@ -124,9 +125,25 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration name="GameUnoTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="MiniProject3" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="org.example.eiscuno.model.game.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="org.example.eiscuno.model.game" />
+      <option name="MAIN_CLASS_NAME" value="org.example.eiscuno.model.game.GameUnoTest" />
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <recent_temporary>
       <list>
         <item itemvalue="Application.Main" />
+        <item itemvalue="JUnit.GameUnoTest" />
       </list>
     </recent_temporary>
   </component>
@@ -169,15 +186,34 @@
       <workItem from="1732204398035" duration="285000" />
       <workItem from="1734184359249" duration="12050000" />
       <workItem from="1734214265472" duration="68000" />
-      <workItem from="1734231537789" duration="3829000" />
-      <workItem from="1734295466845" duration="2122000" />
+      <workItem from="1734231537789" duration="3080000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
   <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/org/example/eiscuno/controller/GameUnoController.java</url>
+          <line>214</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
     <pin-to-top-manager>
       <pinned-members>
         <PinnedItemInfo parentTag="org.example.eiscuno.controller.GameUnoController" memberName="currentTurn" />
