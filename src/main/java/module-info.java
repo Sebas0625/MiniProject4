@@ -3,6 +3,7 @@ module org.example.eiscuno {
     requires javafx.fxml;
     requires java.sql;
     requires java.desktop;
+    requires java.naming;
 
 
     opens org.example.eiscuno to javafx.fxml;

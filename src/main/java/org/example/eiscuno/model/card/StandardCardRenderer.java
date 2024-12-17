@@ -14,33 +14,27 @@ public class StandardCardRenderer implements CardRenderer{
 
     @Override
     public void animateToTable(ImageView cardImageView, ImageView tableImageView, Image cardImage) {
-        // Get absolute bounds
         Bounds startBounds = cardImageView.localToScene(cardImageView.getBoundsInLocal());
         Bounds endBounds = tableImageView.localToScene(tableImageView.getBoundsInLocal());
 
-        // Make a copy of the card
         ImageView animatedCard = new ImageView(cardImageView.getImage());
         animatedCard.setFitWidth(cardImageView.getFitWidth());
         animatedCard.setFitHeight(cardImageView.getFitHeight());
         animatedCard.setLayoutX(startBounds.getMinX());
         animatedCard.setLayoutY(startBounds.getMinY());
 
-        // Add copy to the root layout
         ((Pane) cardImageView.getScene().getRoot()).getChildren().add(animatedCard);
 
-        // Translate transition
         TranslateTransition translate = new TranslateTransition(Duration.seconds(1), animatedCard);
         translate.setFromX(0);
         translate.setFromY(0);
         translate.setToX(endBounds.getMinX() - startBounds.getMinX());
         translate.setToY(endBounds.getMinY() - startBounds.getMinY());
 
-        // Fade transition
         FadeTransition fade = new FadeTransition(Duration.seconds(3.5), animatedCard);
         fade.setFromValue(1.0);
         fade.setToValue(0.0);
 
-        // Scale transition
         ScaleTransition scaleTransition = new ScaleTransition(Duration.seconds(0.5), animatedCard);
         scaleTransition.setFromX(1.0);
         scaleTransition.setFromY(1.0);
@@ -61,7 +55,6 @@ public class StandardCardRenderer implements CardRenderer{
             ((Pane) animatedCard.getParent()).getChildren().remove(animatedCard);
         });
 
-        // run both animations simultaneously
         ParallelTransition parallel = new ParallelTransition(translate, fade, scaleTransition);
         parallel.play();
     }

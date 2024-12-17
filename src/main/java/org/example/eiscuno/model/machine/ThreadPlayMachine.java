@@ -16,15 +16,13 @@ import java.io.IOException;
 public class ThreadPlayMachine extends Thread{
     private final GameUno gameUno;
     private final ImageView tableImageView;
-    private final GridPane gridPaneCardsMachine;
     private volatile boolean running = true;
     private volatile boolean machinePlaying = false;
     private volatile boolean playerPlaying;
 
-    public ThreadPlayMachine(GameUno gameUno, ImageView tableImageView, GridPane gridPaneCardsMachine) {
+    public ThreadPlayMachine(GameUno gameUno, ImageView tableImageView) {
         this.gameUno = gameUno;
         this.tableImageView = tableImageView;
-        this.gridPaneCardsMachine = gridPaneCardsMachine;
     }
 
     public void stopThread(){
@@ -84,12 +82,12 @@ public class ThreadPlayMachine extends Thread{
             gameUno.eatCard(machinePlayer, 1);
             System.out.println("La máquina ha comido una carta");
             Platform.runLater(() -> {
+                gameUnoController.showUpMessage("MACHINE_TAKES");
                 gameUnoController.updateCardsLabel("MACHINE_PLAYER");
                 gameUnoController.printCardsMachinePlayer();
             });
         } else{
             Card card = machinePlayer.getCardsPlayer().get(index);
-
             table.addCardOnTheTable(card);
             try {
                 Thread.sleep(1000);
@@ -101,7 +99,7 @@ public class ThreadPlayMachine extends Thread{
             Platform.runLater(() -> {
                 try {
                     // card.animateToTable((ImageView) gridPaneCardsMachine.getChildren().get(0), tableImageView);
-                    gameUnoController.checkNumberCards(machinePlayer.getCardsPlayer().size(), machinePlayer.getTypePlayer(), gameUnoController.getCurrentTurn());
+                    gameUnoController.checkNumberCards(machinePlayer.getCardsPlayer().size(), machinePlayer.getTypePlayer(), 1);
                     gameUnoController.printCardsMachinePlayer();
                     gameUnoController.handleCardAction(gameUno.getHumanPlayer(), card);
                 } catch (Exception e) {

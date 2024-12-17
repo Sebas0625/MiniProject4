@@ -80,6 +80,7 @@ public class GameUnoStage extends Stage {
         alert.setHeaderText("¿Seguro que desea cerrar la ventana?");
         alert.setContentText("Perderá el progreso actual.");
         if (alert.showAndWait().get() == ButtonType.OK) {
+            GameUnoStageHolder.INSTANCE.getGameUnoController().getThreadPlayMachine().stopThread();
             GameUnoStageHolder.INSTANCE.close();
             GameUnoStageHolder.INSTANCE = null;
         }
@@ -89,6 +90,7 @@ public class GameUnoStage extends Stage {
      * Closes the current instance of {@code WelcomeStage} and sets it to null.
      */
     public static void closeInstance() {
+        GameUnoStageHolder.INSTANCE.getGameUnoController().getThreadPlayMachine().stopThread();
         GameUnoStage.GameUnoStageHolder.INSTANCE.close();
         GameUnoStage.GameUnoStageHolder.INSTANCE = null;
     }
