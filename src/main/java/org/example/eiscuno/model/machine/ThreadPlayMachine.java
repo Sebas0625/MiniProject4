@@ -121,16 +121,11 @@ public class ThreadPlayMachine extends Thread{
         } else{
             Card card = machinePlayer.getCardsPlayer().get(index);
             table.addCardOnTheTable(card);
-            try {
-                Thread.sleep(1000);
-                tableImageView.setImage(card.getImage());
-                machinePlayer.removeCard(index);
-            } catch (InterruptedException e){
-                System.out.println(e.getCause());
-            }
+            tableImageView.setImage(card.getImage());
+            machinePlayer.removeCard(index);
+
             Platform.runLater(() -> {
                 try {
-                    // card.animateToTable((ImageView) gridPaneCardsMachine.getChildren().get(0), tableImageView);
                     gameUnoController.checkNumberCards(machinePlayer.getCardsPlayer().size(), machinePlayer.getTypePlayer(), 1);
                     gameUnoController.printCardsMachinePlayer();
                     gameUnoController.handleCardAction(gameUno.getHumanPlayer(), card);
