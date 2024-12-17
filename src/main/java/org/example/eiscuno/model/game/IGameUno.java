@@ -2,6 +2,7 @@ package org.example.eiscuno.model.game;
 
 import org.example.eiscuno.model.card.Card;
 import org.example.eiscuno.model.player.Player;
+import org.example.eiscuno.model.table.Table;
 
 /**
  * Interface representing the Uno game functionality.
@@ -33,15 +34,13 @@ public interface IGameUno {
      *
      * @param playerWhoSang the identifier of the player who shouted "Uno"
      */
-    void haveSungOne(String playerWhoSang);
+    void hasSungOne(String playerWhoSang);
 
-    /**
-     * Retrieves the current visible cards of the human player starting from a specific position.
-     *
-     * @param posInitCardToShow the starting position of the cards to be shown
-     * @return an array of cards that are currently visible to the human player
-     */
-    Card[] getCurrentVisibleCardsHumanPlayer(int posInitCardToShow);
+    Player getMachinePlayer();
+
+    Player getHumanPlayer();
+
+    Table getTable();
 
     /**
      * Checks if the game is over.

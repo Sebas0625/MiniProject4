@@ -3,7 +3,12 @@ package org.example.eiscuno.view;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.stage.Stage;
+import javafx.scene.image.Image;
+import javafx.scene.ImageCursor;
+import org.example.eiscuno.controller.GameUnoController;
 
 import java.io.IOException;
 
@@ -12,6 +17,7 @@ import java.io.IOException;
  * This stage displays the game interface to the user.
  */
 public class GameUnoStage extends Stage {
+    private GameUnoController gameUnoController;
 
     /**
      * Constructs a new instance of GameUnoStage.
@@ -19,7 +25,7 @@ public class GameUnoStage extends Stage {
      * @throws IOException if an error occurs while loading the FXML file for the game interface.
      */
     public GameUnoStage() throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/eiscuno/game-uno-view.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/eiscuno/fxml/game-uno-view.fxml"));
         Parent root;
         try {
             root = loader.load();
@@ -27,21 +33,29 @@ public class GameUnoStage extends Stage {
             // Re-throwing the caught IOException
             throw new IOException("Error while loading FXML file", e);
         }
+        this.gameUnoController = loader.getController();
+
         Scene scene = new Scene(root);
         // Configuring the stage
         setTitle("EISC Uno"); // Sets the title of the stage
         setScene(scene); // Sets the scene for the stage
+        scene.getStylesheets().add(getClass().getResource("/org/example/eiscuno/styles/game-uno-view-style.css").toExternalForm());
         setResizable(false); // Disallows resizing of the stage
+        setOnCloseRequest(WindowEvent -> {
+            WindowEvent.consume();
+            deleteInstance();
+        });
+        ImageCursor customCursor = new ImageCursor(new Image(getClass().getResource("/org/example/eiscuno/images/cursor.png").toExternalForm()));
+        scene.setCursor(customCursor);
         show(); // Displays the stage
     }
 
     /**
-     * Closes the instance of GameUnoStage.
-     * This method is used to clean up resources when the game stage is no longer needed.
+     * Holder class for the singleton instance of GameUnoStage.
+     * This class ensures lazy initialization of the singleton instance.
      */
-    public static void deleteInstance() {
-        GameUnoStageHolder.INSTANCE.close();
-        GameUnoStageHolder.INSTANCE = null;
+    private static class GameUnoStageHolder {
+        private static GameUnoStage INSTANCE;
     }
 
     /**
@@ -57,10 +71,31 @@ public class GameUnoStage extends Stage {
     }
 
     /**
-     * Holder class for the singleton instance of GameUnoStage.
-     * This class ensures lazy initialization of the singleton instance.
+     * Closes the instance of GameUnoStage.
+     * This method is used to clean up resources when the game stage is no longer needed.
      */
-    private static class GameUnoStageHolder {
-        private static GameUnoStage INSTANCE;
+    public static void deleteInstance() {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle(null);
+        alert.setHeaderText("¿Seguro que desea cerrar la ventana?");
+        alert.setContentText("Perderá el progreso actual.");
+        if (alert.showAndWait().get() == ButtonType.OK) {
+            GameUnoStageHolder.INSTANCE.getGameUnoController().getThreadPlayMachine().stopThread();
+            GameUnoStageHolder.INSTANCE.close();
+            GameUnoStageHolder.INSTANCE = null;
+        }
+    }
+
+    /**
+     * Closes the current instance of {@code WelcomeStage} and sets it to null.
+     */
+    public static void closeInstance() {
+        GameUnoStageHolder.INSTANCE.getGameUnoController().getThreadPlayMachine().stopThread();
+        GameUnoStage.GameUnoStageHolder.INSTANCE.close();
+        GameUnoStage.GameUnoStageHolder.INSTANCE = null;
+    }
+
+    public GameUnoController getGameUnoController() {
+        return gameUnoController;
     }
 }

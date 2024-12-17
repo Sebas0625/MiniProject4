@@ -2,7 +2,8 @@ module org.example.eiscuno {
     requires javafx.controls;
     requires javafx.fxml;
     requires java.sql;
-
+    requires java.desktop;
+    requires java.naming;
 
     opens org.example.eiscuno to javafx.fxml;
     opens org.example.eiscuno.controller to javafx.fxml;

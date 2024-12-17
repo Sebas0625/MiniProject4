@@ -2,8 +2,7 @@ package org.example.eiscuno;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
-import org.example.eiscuno.view.GameUnoStage;
-
+import org.example.eiscuno.view.WelcomeStage;
 import java.io.IOException;
 
 /**
@@ -21,13 +20,13 @@ public class Main extends Application {
     }
 
     /**
-     * Starts the application.
+         * Starts the application.
      *
      * @param primaryStage the primary stage of the application
      * @throws IOException if an error occurs while loading the stage
      */
     @Override
     public void start(Stage primaryStage) throws IOException {
-        GameUnoStage.getInstance();
+        WelcomeStage.getInstance();
     }
 }

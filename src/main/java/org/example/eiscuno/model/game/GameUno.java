@@ -38,10 +38,13 @@ public class GameUno implements IGameUno {
     @Override
     public void startGame() {
         for (int i = 0; i < 10; i++) {
+            Card card = this.deck.takeCard(); // Toma una carta del mazo
             if (i < 5) {
-                humanPlayer.addCard(this.deck.takeCard());
+                humanPlayer.addCard(card); // Añade la carta al jugador humano
+                System.out.println("Carta del jugador.");
             } else {
-                machinePlayer.addCard(this.deck.takeCard());
+                machinePlayer.addCard(card); // Añade la carta a la máquina
+                System.out.println("Carta de la maquina.");
             }
         }
     }
@@ -75,32 +78,30 @@ public class GameUno implements IGameUno {
      * @param playerWhoSang The player who shouted "Uno".
      */
     @Override
-    public void haveSungOne(String playerWhoSang) {
+    public void hasSungOne(String playerWhoSang) {
         if (playerWhoSang.equals("HUMAN_PLAYER")) {
             machinePlayer.addCard(this.deck.takeCard());
         } else {
             humanPlayer.addCard(this.deck.takeCard());
         }
     }
-
-    /**
-     * Retrieves the current visible cards of the human player starting from a specific position.
-     *
-     * @param posInitCardToShow The initial position of the cards to show.
-     * @return An array of cards visible to the human player.
-     */
+    
     @Override
-    public Card[] getCurrentVisibleCardsHumanPlayer(int posInitCardToShow) {
-        int totalCards = this.humanPlayer.getCardsPlayer().size();
-        int numVisibleCards = Math.min(4, totalCards - posInitCardToShow);
-        Card[] cards = new Card[numVisibleCards];
-
-        for (int i = 0; i < numVisibleCards; i++) {
-            cards[i] = this.humanPlayer.getCard(posInitCardToShow + i);
-        }
-
-        return cards;
+    public Player getMachinePlayer(){
+        return machinePlayer;
     }
+
+    @Override
+    public Player getHumanPlayer(){
+        return humanPlayer;
+    }
+
+    @Override
+    public Table getTable(){
+        return table;
+    }
+
+    public Deck getDeck() {return deck;}
 
     /**
      * Checks if the game is over.
