@@ -1,15 +1,16 @@
 package org.example.eiscuno.controller;
 
-import javafx.animation.PauseTransition;
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
+import javafx.animation.*;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
@@ -24,13 +25,11 @@ import org.example.eiscuno.model.machine.ThreadSingUNOMachine;
 import org.example.eiscuno.model.machine.ThreadPlayMachine;
 import org.example.eiscuno.model.player.Player;
 import org.example.eiscuno.model.table.Table;
-import javafx.animation.FadeTransition;
-import javafx.animation.TranslateTransition;
 import org.example.eiscuno.view.GameUnoStage;
 import org.example.eiscuno.view.LoseStage;
 import org.example.eiscuno.view.WinStage;
 
-import javax.swing.*;
+import javafx.scene.layout.Pane;
 import java.io.IOException;
 import java.util.Objects;
 import java.util.Random;
@@ -67,6 +66,12 @@ public class GameUnoController {
     @FXML
     private AnchorPane pieAnchorPane;
 
+    @FXML
+    private ImageView messageImageView;
+
+    @FXML
+    private Pane pane;
+
     private Player humanPlayer;
     private Player machinePlayer;
     private Deck deck;
@@ -97,14 +102,13 @@ public class GameUnoController {
         this.gameUno = new GameUno(this.humanPlayer, this.machinePlayer, this.deck, this.table);
         this.posInitCardToShow = 0;
         this.currentState = new PlayerTurnState();
-        this.threadPlayMachine = new ThreadPlayMachine(gameUno, tableImageView, gridPaneCardsMachine);
+        this.threadPlayMachine = new ThreadPlayMachine(gameUno, tableImageView);
         this.buttonUNO.setDisable(true);
         this.threadSingUNOMachine = new ThreadSingUNOMachine(this.gameUno, this);
         Thread t = new Thread(threadSingUNOMachine, "ThreadSingUNO");
         t.setDaemon(true);
         t.start();
     }
-
 
     private void startGameWithAnimation() {
         gameUno.startGame();
@@ -206,10 +210,10 @@ public class GameUnoController {
     public void handleCardAction(Player targetPlayer, Card card) throws Exception {
         switch (card.getValue()) {
             case "FOUR":
-                gameUno.eatCard(targetPlayer, 4);
-                pieAnchorPane.setVisible(true);
-                tableImageView.setVisible(false);
                 showUpMessage("+4");
+                gameUno.eatCard(targetPlayer, 4);
+                showPieAnchorPane();
+                tableImageView.setVisible(false);
                 if (targetPlayer == humanPlayer){
                     printCardsHumanPlayer();
                     handleMachineColorSelection();
@@ -218,6 +222,7 @@ public class GameUnoController {
                 }
                 break;
             case "TWO":
+                showUpMessage("+2");
                 gameUno.eatCard(targetPlayer, 2);
                 if (targetPlayer == humanPlayer){
                     printCardsHumanPlayer();
@@ -227,17 +232,16 @@ public class GameUnoController {
                 }
                 break;
             case "WILD":
-                pieAnchorPane.setVisible(true);
+                showPieAnchorPane();
                 tableImageView.setVisible(false);
-                showUpMessage("+2");
                 if (targetPlayer == humanPlayer){ handleMachineColorSelection(); }
                 break;
             case "SKIP":
-                showUpMessage("TURNO SALTADO");
+                showUpMessage("SKIP");
                 currentState.nexTurn(this);
                 break;
             case "REVERSE":
-                showUpMessage("SENTIDO CAMBIADO");
+                showUpMessage("REVERSE");
                 currentState.nexTurn(this);
                 break;
             default:
@@ -380,6 +384,7 @@ public class GameUnoController {
                     throw new GameException("El mazo de cartas se encuentra vacío");
                 } else {
                     gameUno.eatCard(humanPlayer, 1);
+                    showUpMessage("HUMAN_PLAYER_TAKES");
                     if (this.posInitCardToShow < this.humanPlayer.getCardsPlayer().size() - 4) {
                         posInitCardToShow = humanPlayer.getCardsPlayer().size() - 4;
                     }
@@ -441,23 +446,6 @@ public class GameUnoController {
         timeline.play(); // Start timeline
     }
 
-    public void discardCard(Card card) {
-        animateCardDiscard(card);
-    }
-
-    private void animateCardDiscard(Card card) {
-        ImageView cardImageView = card.getCard();
-        cardImageView.setOpacity(1);
-        tableImageView.setImage(card.getImage());
-
-        TranslateTransition translate = new TranslateTransition(Duration.seconds(0.5), cardImageView);
-        translate.setFromX(tableImageView.getLayoutX());
-        translate.setFromY(tableImageView.getLayoutY());
-        translate.setToX(tableImageView.getLayoutX() + 50);
-        translate.setToY(tableImageView.getLayoutY() + 50);
-        translate.play();
-    }
-
     private void animateCardDeal(Card card, GridPane gridPane, int position) {
         ImageView cardImageView = card.getCard();
         cardImageView.setOpacity(0);
@@ -470,10 +458,79 @@ public class GameUnoController {
         fadeIn.play();
     }
 
-    private void showUpMessage(String message){
-        Label messageLabel = new Label();
-        messageLabel.setAlignment(Pos.CENTER);
-        messageLabel.setText(message);
+    private void showPieAnchorPane(){
+        pieAnchorPane.setVisible(true);
+        pieAnchorPane.setOpacity(0.0);
+        pieAnchorPane.setScaleX(0.5);
+        pieAnchorPane.setScaleY(0.5);
+
+        ScaleTransition scale = new ScaleTransition(Duration.seconds(0.3), pieAnchorPane);
+        scale.setFromX(0.5);
+        scale.setFromY(0.5);
+        scale.setToX(1.0);
+        scale.setToY(1.0);
+        scale.setInterpolator(Interpolator.EASE_OUT);
+
+        pieAnchorPane.setOpacity(1.0);
+
+        scale.play();
+    }
+
+    public void showUpMessage(String message){
+        Image popImage;
+        String url = "/org/example/eiscuno/images/";
+
+        switch (message){
+            case "+4":
+                popImage = new Image(getClass().getResource(url + "+4.png").toExternalForm());
+                break;
+            case "+2":
+                popImage = new Image(getClass().getResource(url + "+2.png").toExternalForm());
+                break;
+            case "REVERSE":
+                popImage = new Image(getClass().getResource(url + "reverse.png").toExternalForm());
+                break;
+            case "SKIP":
+                popImage = new Image(getClass().getResource(url + "skip.png").toExternalForm());
+                break;
+            case "MACHINE_TAKES":
+                popImage = new Image(getClass().getResource(url + "machineCardTake.png").toExternalForm());
+                break;
+            case "HUMAN_PLAYER_TAKES":
+                popImage = new Image(getClass().getResource(url + "playerCardTake.png").toExternalForm());
+                break;
+            default:
+                popImage = new Image(url + "uno.png");
+        }
+
+        messageImageView.setImage(popImage);
+        messageImageView.setVisible(true);
+        messageImageView.setOpacity(0.0);
+        messageImageView.setScaleX(0.5);
+        messageImageView.setScaleY(0.5);
+        messageImageView.setFitWidth(200);
+        messageImageView.setFitHeight(200);
+        messageImageView.setLayoutX((pane.getWidth() - messageImageView.getFitWidth()) / 2);
+        messageImageView.setLayoutY((pane.getHeight() - messageImageView.getFitHeight()) / 2);
+
+        ScaleTransition scale = new ScaleTransition(Duration.seconds(0.3), messageImageView);
+        scale.setFromX(0.5);
+        scale.setFromY(0.5);
+        scale.setToX(1.0);
+        scale.setToY(1.0);
+        scale.setInterpolator(Interpolator.EASE_OUT);
+
+        FadeTransition fade = new FadeTransition(Duration.seconds(0.5), messageImageView);
+        fade.setFromValue(1.0);
+        fade.setToValue(0.0);
+        fade.setDelay(Duration.seconds(0.3));
+
+        messageImageView.setOpacity(1.0);
+        scale.setOnFinished(event -> {
+            fade.play();
+            fade.setOnFinished(event1 -> messageImageView.setVisible(false));
+        });
+        scale.play();
     }
 
     public void updateCardsLabel(String player){
@@ -481,6 +538,20 @@ public class GameUnoController {
             humanPlayerCardsLabel.setText("Tus cartas: " + humanPlayer.getCardsPlayer().size());
         } else{
             machineCardsLabel.setText("Cartas de la máquina: " + machinePlayer.getCardsPlayer().size());
+        }
+    }
+
+    public ThreadPlayMachine getThreadPlayMachine() { return threadPlayMachine; }
+
+    @FXML
+    public void exit(){
+        GameUnoStage.closeInstance();
+    }
+
+    @FXML
+    public void keyPressedHandler(KeyEvent event){
+        if(event.getCode() == KeyCode.T){
+            onHandleTakeCard();
         }
     }
 }
