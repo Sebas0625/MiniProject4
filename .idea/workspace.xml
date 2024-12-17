@@ -4,10 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1ee8ff40-bbdd-4aec-a3d2-cf5cc45130ec" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/org/example/eiscuno/model/player/PlayerTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/org/example/eiscuno/model/player/PlayerTest.java" afterDir="false" />
-    </list>
+    <list default="true" id="1ee8ff40-bbdd-4aec-a3d2-cf5cc45130ec" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -83,6 +80,7 @@
     "JUnit.GameUnoControllerTest.executor": "Run",
     "JUnit.GameUnoControllerTest.testOnHandleTakeCard.executor": "Run",
     "JUnit.GameUnoTest.executor": "Run",
+    "JUnit.GameUnoTest.startGame.executor": "Run",
     "JUnit.GameUnoTest.testGameInitialization.executor": "Run",
     "JUnit.GameUnoTest.testInitialPlayerNotifications.executor": "Run",
     "JUnit.GameUnoTest.testInitialPlayerSelection.executor": "Run",
@@ -142,7 +140,7 @@
       <recent name="org.example.eiscuno.model.player" />
     </key>
   </component>
-  <component name="RunManager" selected="Application.Main">
+  <component name="RunManager" selected="JUnit.PlayerTest.testInitialCardCount">
     <configuration name="Main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="org.example.eiscuno.Main" />
       <module name="eisc-uno" />
@@ -156,38 +154,7 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="GameUnoControllerTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="eisc-uno" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="org.example.eiscuno.controller.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="PACKAGE_NAME" value="org.example.eiscuno.controller" />
-      <option name="MAIN_CLASS_NAME" value="org.example.eiscuno.controller.GameUnoControllerTest" />
-      <option name="TEST_OBJECT" value="class" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="GameUnoControllerTest.testOnHandleTakeCard" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="eisc-uno" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="org.example.eiscuno.controller.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="PACKAGE_NAME" value="org.example.eiscuno.controller" />
-      <option name="MAIN_CLASS_NAME" value="org.example.eiscuno.controller.GameUnoControllerTest" />
-      <option name="METHOD_NAME" value="testOnHandleTakeCard" />
-      <option name="TEST_OBJECT" value="method" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="GameUnoTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+    <configuration name="GameUnoTest.startGame" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="eisc-uno" />
       <extension name="coverage">
         <pattern>
@@ -197,7 +164,8 @@
       </extension>
       <option name="PACKAGE_NAME" value="org.example.eiscuno.model.game" />
       <option name="MAIN_CLASS_NAME" value="org.example.eiscuno.model.game.GameUnoTest" />
-      <option name="TEST_OBJECT" value="class" />
+      <option name="METHOD_NAME" value="startGame" />
+      <option name="TEST_OBJECT" value="method" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -217,13 +185,45 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration name="PlayerTest.testInitialCardCount" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="eisc-uno" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="org.example.eiscuno.model.player.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="org.example.eiscuno.model.player" />
+      <option name="MAIN_CLASS_NAME" value="org.example.eiscuno.model.player.PlayerTest" />
+      <option name="METHOD_NAME" value="testInitialCardCount" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="PlayerTest.testPlayerNameInitialization" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="eisc-uno" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="org.example.eiscuno.model.player.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="org.example.eiscuno.model.player" />
+      <option name="MAIN_CLASS_NAME" value="org.example.eiscuno.model.player.PlayerTest" />
+      <option name="METHOD_NAME" value="testPlayerNameInitialization" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="JUnit.PlayerTest.testInitialCardCount" />
+        <item itemvalue="JUnit.PlayerTest.testPlayerNameInitialization" />
+        <item itemvalue="JUnit.GameUnoTest.startGame" />
         <item itemvalue="Application.Main" />
         <item itemvalue="JUnit.PlayerTest" />
-        <item itemvalue="JUnit.GameUnoTest" />
-        <item itemvalue="JUnit.GameUnoControllerTest" />
-        <item itemvalue="JUnit.GameUnoControllerTest.testOnHandleTakeCard" />
       </list>
     </recent_temporary>
   </component>
