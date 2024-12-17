@@ -21,7 +21,7 @@
    <left>
       <Pane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
          <children>
-            <ImageView fitHeight="211.0" fitWidth="141.0" layoutX="30.0" layoutY="67.0" onMouseClicked="#onHandleTakeCard" pickOnBounds="true" preserveRatio="true">
+            <ImageView fx:id="deckImageView" fitHeight="211.0" fitWidth="141.0" layoutX="30.0" layoutY="67.0" onMouseClicked="#onHandleTakeCard" pickOnBounds="true" preserveRatio="true">
                <image>
                   <Image url="@../cards-uno/deck_of_cards.png" />
                </image>
@@ -59,10 +59,16 @@
    <center>
       <Pane fx:id="pane" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
          <children>
-            <Label fx:id="humanPlayerCardsLabel" alignment="CENTER" contentDisplay="CENTER" layoutX="182.0" layoutY="306.0" prefHeight="17.0" prefWidth="132.0" text="Tus cartas:" textAlignment="CENTER" wrapText="true" />
+            <Label fx:id="humanPlayerCardsLabel" alignment="CENTER" contentDisplay="CENTER" layoutX="170.0" layoutY="289.0" prefHeight="32.0" prefWidth="157.0" text="Tus cartas:" textAlignment="CENTER" wrapText="true">
+               <font>
+                  <Font size="22.0" />
+               </font></Label>
             <ImageView fx:id="tableImageView" fitHeight="171.0" fitWidth="141.0" layoutX="191.0" layoutY="83.0" pickOnBounds="true" preserveRatio="true" styleClass="centerImage" />
-            <Label fx:id="machineCardsLabel" alignment="CENTER" contentDisplay="CENTER" layoutX="182.0" layoutY="14.0" prefHeight="17.0" prefWidth="132.0" text="Cartas de la máquina: " textAlignment="CENTER" wrapText="true" />
             <ImageView fx:id="messageImageView" fitHeight="240.0" fitWidth="375.0" layoutX="63.0" layoutY="49.0" pickOnBounds="true" preserveRatio="true" />
+            <Label fx:id="machineCardsLabel" alignment="CENTER" contentDisplay="CENTER" layoutX="131.0" layoutY="5.0" prefHeight="32.0" prefWidth="239.0" text="Cartas de la máquina: " textAlignment="CENTER" wrapText="true">
+               <font>
+                  <Font size="22.0" />
+               </font></Label>
             <AnchorPane fx:id="pieAnchorPane" layoutX="139.0" layoutY="57.0" prefHeight="223.0" prefWidth="218.0" visible="false">
                <children>
                   <Arc id="blueArc" fill="#0d00ff" layoutX="109.0" layoutY="100.0" length="90.0" onMouseClicked="#setBlueColor" radiusX="100.0" radiusY="100.0" startAngle="45.0" stroke="BLACK" strokeType="INSIDE" type="ROUND" />
@@ -77,7 +83,7 @@
    <top>
       <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="130.0" prefWidth="900.0" BorderPane.alignment="CENTER">
          <children>
-            <Button layoutX="753.0" layoutY="71.0" mnemonicParsing="false" onAction="#exit" prefHeight="61.0" prefWidth="95.0" styleClass="exitButton" text="Salir">
+            <Button layoutX="751.0" layoutY="10.0" mnemonicParsing="false" onAction="#exit" prefHeight="61.0" prefWidth="95.0" styleClass="exitButton" text="Salir">
                <font>
                   <Font size="27.0" />
                </font></Button>
