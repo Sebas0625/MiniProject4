@@ -60,6 +60,17 @@ public class Player implements IPlayer {
         return cardsPlayer.get(index);
     }
 
+    /**
+     * Retrieves an array of the currently visible cards for a player, starting from a given position.
+     * This method returns up to 4 cards, depending on the total number of cards the player holds
+     * and the specified starting position.
+     *
+     * @param posInitCardToShow The starting position in the player's card list from which
+     *                          visible cards should be retrieved.
+     * @return An array of {@code Card} objects representing the visible cards.
+     *         The array will contain up to 4 cards or fewer if the starting position leaves
+     *         fewer than 4 cards available.
+     */
     @Override
     public Card[] getCurrentVisibleCards(int posInitCardToShow){
         int totalCards = cardsPlayer.size();
